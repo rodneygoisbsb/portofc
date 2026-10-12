@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: portofc-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: portofc_db
+      POSTGRES_USER: portofc_user
+      POSTGRES_PASSWORD: portofc_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portofc_user -d portofc_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
