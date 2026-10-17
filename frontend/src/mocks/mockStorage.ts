@@ -1,5 +1,5 @@
-import { Aluno, Colaborador, FolhaAula, LancamentoFinanceiro, Material, Uniforme, DashboardStats, CategoriaAluno, CategoriaDespesa } from '../types';
-import { INITIAL_ALUNOS, INITIAL_COLABORADORES, INITIAL_FOLHAS, INITIAL_LANCAMENTOS, INITIAL_MATERIAIS, INITIAL_UNIFORMES, INITIAL_ORCAMENTOS } from './mockData';
+import { Aluno, Colaborador, FolhaAula, LancamentoFinanceiro, Material, Uniforme, DashboardStats, CategoriaAluno, CategoriaDespesa, ChamadaItem } from '../types';
+import { INITIAL_ALUNOS, INITIAL_COLABORADORES, INITIAL_FOLHAS, INITIAL_LANCAMENTOS, INITIAL_MATERIAIS, INITIAL_UNIFORMES, INITIAL_ORCAMENTOS, INITIAL_CHAMADAS_HISTORICO } from './mockData';
 
 const STORAGE_KEYS = {
   ALUNOS: 'portofc_alunos',
@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
   LANCAMENTOS: 'portofc_lancamentos',
   MATERIAIS: 'portofc_materiais',
   UNIFORMES: 'portofc_uniformes',
+  CHAMADAS: 'portofc_chamadas_historico',
 };
 
 function getStored<T>(key: string, defaultValue: T): T {
@@ -30,6 +31,56 @@ function setStored<T>(key: string, value: T): void {
 export const MockStorage = {
   getAlunos(categoria?: CategoriaAluno, busca?: string): Aluno[] {
     let list = getStored<Aluno[]>(STORAGE_KEYS.ALUNOS, INITIAL_ALUNOS);
+
+    // Garante que novos alunos mockados (ex: Sub-9 IDs 18, 19, 20) existam mesmo com cache no localStorage
+    const existingIds = new Set(list.map((a) => a.id));
+    const missing = INITIAL_ALUNOS.filter((a) => !existingIds.has(a.id));
+    let changed = false;
+
+    if (missing.length > 0) {
+      list = [...list, ...missing];
+      changed = true;
+    }
+
+    const simulatedBirthdays: Record<number, string> = {
+      1: '2019-10-17', // SUB_7 (Hoje!)
+      4: '2017-10-22', // SUB_9 (em 5 dias)
+      10: '2012-10-20', // SUB_15 (em 3 dias)
+      11: '2009-10-21', // SUB_17 (em 4 dias)
+      14: '2004-10-19', // ADULTO (em 2 dias)
+    };
+
+    list = list.map((a) => {
+      let dataNascimento = simulatedBirthdays[a.id] || a.dataNascimento;
+      let turma = a.turma;
+      let horarioTreino = a.horarioTreino;
+
+      // Normaliza Sub-9 inicial para Segunda e Quarta
+      if (a.categoria === 'SUB_9' && (a.id === 4 || a.id === 5 || a.id === 6)) {
+        if (turma === 'Turma A' || !turma) {
+          turma = 'Segunda e Quarta';
+          horarioTreino = '09:00 às 10:15';
+          changed = true;
+        }
+      }
+
+      if ((!turma || !horarioTreino) && a.turmaHorario && a.turmaHorario.includes(' - ')) {
+        const parts = a.turmaHorario.split(' - ');
+        turma = turma || parts[0]?.trim();
+        horarioTreino = horarioTreino || parts.slice(1).join(' - ')?.trim();
+      }
+
+      return {
+        ...a,
+        turma,
+        horarioTreino,
+        dataNascimento,
+      };
+    });
+
+    if (changed) {
+      setStored(STORAGE_KEYS.ALUNOS, list);
+    }
     if (categoria) {
       list = list.filter(a => a.categoria === categoria);
     }
@@ -42,10 +93,20 @@ export const MockStorage = {
 
   saveAluno(alunoData: Partial<Aluno>): Aluno {
     const list = getStored<Aluno[]>(STORAGE_KEYS.ALUNOS, INITIAL_ALUNOS);
+    const turmaCalculada = alunoData.turma?.trim();
+    const horarioCalculado = alunoData.horarioTreino?.trim();
+    const turmaHorarioFinal = alunoData.turmaHorario || (turmaCalculada && horarioCalculado ? `${turmaCalculada} - ${horarioCalculado}` : turmaCalculada || horarioCalculado);
+
     if (alunoData.id) {
       const index = list.findIndex(a => a.id === alunoData.id);
       if (index !== -1) {
-        list[index] = { ...list[index], ...alunoData } as Aluno;
+        list[index] = {
+          ...list[index],
+          ...alunoData,
+          turma: turmaCalculada,
+          horarioTreino: horarioCalculado,
+          turmaHorario: turmaHorarioFinal,
+        } as Aluno;
         setStored(STORAGE_KEYS.ALUNOS, list);
         return list[index];
       }
@@ -60,7 +121,9 @@ export const MockStorage = {
       telefone: alunoData.telefone,
       responsavel: alunoData.responsavel || '',
       categoria: alunoData.categoria || 'SUB_9',
-      turmaHorario: alunoData.turmaHorario,
+      turma: turmaCalculada,
+      horarioTreino: horarioCalculado,
+      turmaHorario: turmaHorarioFinal,
       status: alunoData.status || 'ATIVO',
       fotoUrl: alunoData.fotoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       dataMatricula: new Date().toISOString().split('T')[0],
@@ -287,5 +350,48 @@ export const MockStorage = {
       despesasPorCategoria,
       execucaoOrcamentaria: INITIAL_ORCAMENTOS,
     };
+  },
+
+  getChamada(categoria: string, dataAula: string, turma?: string, horario?: string): { itens: ChamadaItem[]; dataRegistro: string } | null {
+    const chamadas = getStored<Record<string, { itens: ChamadaItem[]; dataRegistro: string; turma?: string; horario?: string }>>(
+      STORAGE_KEYS.CHAMADAS,
+      INITIAL_CHAMADAS_HISTORICO
+    );
+    // 1. Tenta chave ultra-específica: data + categoria + turma + horario
+    if (turma && horario) {
+      const keyFull = `${dataAula}_${categoria}_${turma}_${horario}`;
+      if (chamadas[keyFull]) return chamadas[keyFull];
+    }
+    // 2. Tenta chave com turma
+    if (turma) {
+      const keyTurma = `${dataAula}_${categoria}_${turma}`;
+      if (chamadas[keyTurma]) return chamadas[keyTurma];
+    }
+    // 3. Tenta chave padrão: data + categoria
+    const keyPadrao = `${dataAula}_${categoria}`;
+    if (chamadas[keyPadrao]) return chamadas[keyPadrao];
+
+    return null;
+  },
+
+  saveChamada(categoria: string, dataAula: string, itens: ChamadaItem[], turma?: string, horario?: string): void {
+    const chamadas = getStored<Record<string, { itens: ChamadaItem[]; dataRegistro: string; turma?: string; horario?: string }>>(
+      STORAGE_KEYS.CHAMADAS,
+      INITIAL_CHAMADAS_HISTORICO
+    );
+    const registro = {
+      itens,
+      dataRegistro: new Date().toISOString(),
+      turma,
+      horario,
+    };
+    if (turma && horario) {
+      chamadas[`${dataAula}_${categoria}_${turma}_${horario}`] = registro;
+    }
+    if (turma) {
+      chamadas[`${dataAula}_${categoria}_${turma}`] = registro;
+    }
+    chamadas[`${dataAula}_${categoria}`] = registro;
+    setStored(STORAGE_KEYS.CHAMADAS, chamadas);
   }
 };

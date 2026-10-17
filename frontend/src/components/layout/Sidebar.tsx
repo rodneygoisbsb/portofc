@@ -28,12 +28,12 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => {
   const menuItems = [
-    { id: 'dashboard' as NavTab, label: 'Painel Geral', icon: LayoutDashboard },
-    { id: 'alunos' as NavTab, label: 'Alunos & Turmas', icon: Users },
-    { id: 'frequencia' as NavTab, label: 'Chamada & Frequência', icon: CalendarCheck },
-    { id: 'equipe' as NavTab, label: 'Equipe & Folha', icon: Briefcase },
-    { id: 'financeiro' as NavTab, label: 'Financeiro & Orçamento', icon: DollarSign },
-    { id: 'materiais' as NavTab, label: 'Materiais & Uniformes', icon: Shirt },
+    { id: 'dashboard' as NavTab, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'alunos' as NavTab, label: 'Alunos', icon: Users },
+    { id: 'frequencia' as NavTab, label: 'Frequência Diária', icon: CalendarCheck },
+    { id: 'equipe' as NavTab, label: 'Equipe', icon: Briefcase },
+    { id: 'financeiro' as NavTab, label: 'Financeiro', icon: DollarSign },
+    { id: 'materiais' as NavTab, label: 'Materiais', icon: Shirt },
     { id: 'prestacao' as NavTab, label: 'Prestação de Contas', icon: FileSpreadsheet },
   ];
 

@@ -38,6 +38,12 @@ public class Aluno {
     @Column(nullable = false, length = 20)
     private CategoriaAluno categoria;
 
+    @Column(name = "turma")
+    private String turma;
+
+    @Column(name = "horario_treino")
+    private String horarioTreino;
+
     @Column(name = "turma_horario")
     private String turmaHorario;
 

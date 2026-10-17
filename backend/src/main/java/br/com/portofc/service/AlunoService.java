@@ -53,6 +53,11 @@ public class AlunoService {
             cat = calcularCategoriaPorIdade(dto.getDataNascimento());
         }
 
+        String turmaHorarioCalculado = dto.getTurmaHorario();
+        if (turmaHorarioCalculado == null && (dto.getTurma() != null || dto.getHorarioTreino() != null)) {
+            turmaHorarioCalculado = ((dto.getTurma() != null ? dto.getTurma() : "") + " - " + (dto.getHorarioTreino() != null ? dto.getHorarioTreino() : "")).trim();
+        }
+
         Aluno aluno = Aluno.builder()
                 .nome(dto.getNome())
                 .cpf(dto.getCpf())
@@ -60,7 +65,9 @@ public class AlunoService {
                 .telefone(dto.getTelefone())
                 .responsavel(dto.getResponsavel())
                 .categoria(cat)
-                .turmaHorario(dto.getTurmaHorario())
+                .turma(dto.getTurma())
+                .horarioTreino(dto.getHorarioTreino())
+                .turmaHorario(turmaHorarioCalculado)
                 .status(dto.getStatus() != null ? dto.getStatus() : StatusAluno.ATIVO)
                 .fotoUrl(dto.getFotoUrl())
                 .observacoesMedicas(dto.getObservacoesMedicas())
@@ -84,7 +91,13 @@ public class AlunoService {
         if (dto.getCategoria() != null) {
             aluno.setCategoria(dto.getCategoria());
         }
-        aluno.setTurmaHorario(dto.getTurmaHorario());
+        aluno.setTurma(dto.getTurma());
+        aluno.setHorarioTreino(dto.getHorarioTreino());
+        if (dto.getTurmaHorario() != null) {
+            aluno.setTurmaHorario(dto.getTurmaHorario());
+        } else if (dto.getTurma() != null || dto.getHorarioTreino() != null) {
+            aluno.setTurmaHorario(((dto.getTurma() != null ? dto.getTurma() : "") + " - " + (dto.getHorarioTreino() != null ? dto.getHorarioTreino() : "")).trim());
+        }
         if (dto.getStatus() != null) {
             aluno.setStatus(dto.getStatus());
         }
@@ -125,6 +138,8 @@ public class AlunoService {
                 .telefone(aluno.getTelefone())
                 .responsavel(aluno.getResponsavel())
                 .categoria(aluno.getCategoria())
+                .turma(aluno.getTurma())
+                .horarioTreino(aluno.getHorarioTreino())
                 .turmaHorario(aluno.getTurmaHorario())
                 .status(aluno.getStatus())
                 .fotoUrl(aluno.getFotoUrl())

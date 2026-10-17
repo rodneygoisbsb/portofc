@@ -96,7 +96,7 @@ export const MateriaisModule: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Materiais & Uniformes</h2>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Materiais e Uniformes</h2>
           <p className="text-sm text-slate-500 mt-1">
             Controle da grade de fardamento dos alunos e equipamentos de treinamento.
           </p>

@@ -23,6 +23,8 @@ public class AlunoResponseDTO {
     private String telefone;
     private String responsavel;
     private CategoriaAluno categoria;
+    private String turma;
+    private String horarioTreino;
     private String turmaHorario;
     private StatusAluno status;
     private String fotoUrl;

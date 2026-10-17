@@ -69,7 +69,7 @@ export const PrestacaoContasModule: React.FC = () => {
       {/* Action Header (Hidden in Print) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Prestação de Contas Oficial</h2>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Prestação de Contas</h2>
           <p className="text-sm text-slate-500 mt-1">
             Relatório gerencial e contábil consolidado do projeto social esportivo.
           </p>

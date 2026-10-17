@@ -33,6 +33,10 @@ public class AlunoRequestDTO {
     @NotNull(message = "A categoria é obrigatória")
     private CategoriaAluno categoria;
 
+    private String turma;
+
+    private String horarioTreino;
+
     private String turmaHorario;
 
     private StatusAluno status;

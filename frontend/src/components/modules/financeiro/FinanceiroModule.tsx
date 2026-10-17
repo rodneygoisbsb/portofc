@@ -124,7 +124,7 @@ export const FinanceiroModule: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Financeiro & Orçamento</h2>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Financeiro</h2>
           <p className="text-sm text-slate-500 mt-1">
             Lançamento de receitas e despesas, controle orçamentário e comprovantes.
           </p>

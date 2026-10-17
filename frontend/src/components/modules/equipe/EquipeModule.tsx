@@ -92,7 +92,7 @@ export const EquipeModule: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Equipe & Folha de Pagamento</h2>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Folha de Pagamento</h2>
           <p className="text-sm text-slate-500 mt-1">
             Gestão do corpo técnico, apuração de aulas por hora e emissão de folhas.
           </p>

@@ -23,6 +23,8 @@ export interface Aluno {
   telefone?: string;
   responsavel: string;
   categoria: CategoriaAluno;
+  turma?: string;
+  horarioTreino?: string;
   turmaHorario?: string;
   status: StatusAluno;
   fotoUrl?: string;

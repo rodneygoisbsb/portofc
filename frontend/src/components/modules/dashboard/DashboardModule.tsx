@@ -65,25 +65,6 @@ export const DashboardModule: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-blue-900/10">
-        <div className="absolute right-0 top-0 bottom-0 opacity-10 flex items-center pr-10 pointer-events-none">
-          <ShieldCheck size={280} />
-        </div>
-        <div className="relative z-10 max-w-2xl">
-          <Badge variant="emerald" className="mb-3 bg-emerald-500/20 text-emerald-200 border-emerald-400/30">
-            ONG Esportiva Oficial
-          </Badge>
-          <h2 className="text-3xl font-extrabold tracking-tight">
-            Plataforma Administrativa PORTO FC
-          </h2>
-          <p className="text-blue-100 text-sm mt-2 leading-relaxed">
-            Painel unificado para monitoramento de projetos esportivos, controle de turmas (Sub-7 a Adulto),
-            chamadas diárias e gestão orçamentária transparente.
-          </p>
-        </div>
-      </div>
-
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Saldo Disponivel */}
