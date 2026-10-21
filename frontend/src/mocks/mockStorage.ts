@@ -1,4 +1,4 @@
-import { Aluno, Colaborador, FolhaAula, LancamentoFinanceiro, Material, Uniforme, DashboardStats, CategoriaAluno, CategoriaDespesa, ChamadaItem } from '../types';
+import { Aluno, Colaborador, FolhaAula, FormaPagamento, LancamentoFinanceiro, Material, Uniforme, DashboardStats, CategoriaAluno, CategoriaDespesa, ChamadaItem, TetoConfig } from '../types';
 import { INITIAL_ALUNOS, INITIAL_COLABORADORES, INITIAL_FOLHAS, INITIAL_LANCAMENTOS, INITIAL_MATERIAIS, INITIAL_UNIFORMES, INITIAL_ORCAMENTOS, INITIAL_CHAMADAS_HISTORICO } from './mockData';
 
 const STORAGE_KEYS = {
@@ -143,6 +143,24 @@ export const MockStorage = {
 
   getColaboradores(busca?: string): Colaborador[] {
     let list = getStored<Colaborador[]>(STORAGE_KEYS.COLABORADORES, INITIAL_COLABORADORES);
+
+    // Garante que campos novos (dataNascimento, chavePix) sejam sincronizados com colaboradores mockados existentes
+    let updated = false;
+    list = list.map((c) => {
+      const initial = INITIAL_COLABORADORES.find((ic) => ic.id === c.id);
+      let dataNascimento = c.dataNascimento || initial?.dataNascimento;
+      let chavePix = c.chavePix || initial?.chavePix;
+      if (dataNascimento !== c.dataNascimento || chavePix !== c.chavePix) {
+        updated = true;
+        return { ...c, dataNascimento, chavePix };
+      }
+      return c;
+    });
+
+    if (updated) {
+      setStored(STORAGE_KEYS.COLABORADORES, list);
+    }
+
     if (busca && busca.trim()) {
       const q = busca.toLowerCase();
       list = list.filter(c => c.nome.toLowerCase().includes(q) || c.funcao.toLowerCase().includes(q));
@@ -175,32 +193,265 @@ export const MockStorage = {
       status: data.status || 'ATIVO',
       fotoUrl: data.fotoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       dataAdmissao: new Date().toISOString().split('T')[0],
+      dataNascimento: data.dataNascimento,
+      chavePix: data.chavePix,
     };
     list.push(newColab);
     setStored(STORAGE_KEYS.COLABORADORES, list);
     return newColab;
   },
 
+  deleteColaborador(id: number): void {
+    const list = getStored<Colaborador[]>(STORAGE_KEYS.COLABORADORES, INITIAL_COLABORADORES);
+    setStored(STORAGE_KEYS.COLABORADORES, list.filter(c => c.id !== id));
+  },
+
   getFolhas(mesReferencia?: string): FolhaAula[] {
+    const targetMes = mesReferencia || '2026-10';
     let list = getStored<FolhaAula[]>(STORAGE_KEYS.FOLHAS, INITIAL_FOLHAS);
+    const colabs = getStored<Colaborador[]>(STORAGE_KEYS.COLABORADORES, INITIAL_COLABORADORES);
+
+    let changed = false;
+
+    // 1. Sincroniza e garante que todo colaborador cadastrado tenha apuração na Folha
+    colabs.forEach((colab) => {
+      const existingIndex = list.findIndex(
+        (f) => f.colaboradorId === colab.id && f.mesReferencia === targetMes
+      );
+
+      if (existingIndex !== -1) {
+        // Atualiza dados sincronizados do colaborador (nome, cargo, foto, vínculo)
+        const current = list[existingIndex];
+        const isHorista = colab.tipoContratacao === 'HORISTA';
+        const updatedName = current.colaboradorNome !== colab.nome;
+        const updatedFuncao = current.colaboradorFuncao !== colab.funcao;
+        const updatedFoto = current.colaboradorFotoUrl !== colab.fotoUrl;
+        const updatedTipo = current.tipoContratacao !== colab.tipoContratacao;
+
+        if (updatedName || updatedFuncao || updatedFoto || updatedTipo) {
+          list[existingIndex] = {
+            ...current,
+            colaboradorNome: colab.nome,
+            colaboradorFuncao: colab.funcao,
+            colaboradorFotoUrl: colab.fotoUrl,
+            tipoContratacao: colab.tipoContratacao,
+            valorHora: isHorista ? (colab.valorHora || current.valorHora) : current.valorHora,
+          };
+          changed = true;
+        }
+      } else {
+        // Novo colaborador criado em Corpo Docente: adiciona na folha de apuração
+        const nextId = list.length > 0 ? Math.max(...list.map((f) => f.id)) + 1 : 1;
+        const isHorista = colab.tipoContratacao === 'HORISTA';
+        const horasRegistradas = isHorista ? 40 : 160;
+        const valorHora = isHorista
+          ? (colab.valorHora || 50.0)
+          : (colab.salarioFixo ? Number((colab.salarioFixo / 160).toFixed(2)) : 28.12);
+        const totalBruto = isHorista ? horasRegistradas * valorHora : (colab.salarioFixo || 4500.0);
+        const diasTransporte = isHorista ? 16 : 20;
+        const valorDiarioTransporte = 11.0;
+        const passagem = diasTransporte * valorDiarioTransporte;
+        const outrosBeneficios = Math.max(0, (colab.beneficios || 0) - passagem);
+        const beneficios = passagem + outrosBeneficios;
+        const descontos = 0;
+        const liquidoPagar = totalBruto + beneficios - descontos;
+
+        list.push({
+          id: nextId,
+          colaboradorId: colab.id,
+          colaboradorNome: colab.nome,
+          colaboradorFuncao: colab.funcao,
+          colaboradorFotoUrl: colab.fotoUrl,
+          tipoContratacao: colab.tipoContratacao,
+          mesReferencia: targetMes,
+          horasRegistradas,
+          valorHora,
+          totalBruto,
+          diasTransporte,
+          valorDiarioTransporte,
+          passagem,
+          outrosBeneficios,
+          beneficios,
+          descontos,
+          liquidoPagar,
+          status: 'PENDENTE',
+        });
+        changed = true;
+      }
+    });
+
+    // 2. Remove da apuração colaboradores que foram excluídos
+    const activeColabIds = new Set(colabs.map((c) => c.id));
+    const previousLength = list.length;
+    list = list.filter((f) => activeColabIds.has(f.colaboradorId));
+    if (list.length !== previousLength) {
+      changed = true;
+    }
+
+    if (changed) {
+      setStored(STORAGE_KEYS.FOLHAS, list);
+    }
+
     if (mesReferencia) {
-      list = list.filter(f => f.mesReferencia === mesReferencia);
+      return list.filter((f) => f.mesReferencia === mesReferencia);
     }
     return list;
   },
 
-  updateFolhaStatus(id: number, status: 'PAGO' | 'PENDENTE'): FolhaAula {
+  saveFolha(data: Partial<FolhaAula>): FolhaAula {
+    let list = getStored<FolhaAula[]>(STORAGE_KEYS.FOLHAS, INITIAL_FOLHAS);
+    const index = list.findIndex(
+      (f) => f.id === data.id || (data.colaboradorId && f.colaboradorId === data.colaboradorId && f.mesReferencia === data.mesReferencia)
+    );
+
+    if (index !== -1) {
+      const current = list[index];
+      const horasRegistradas = data.horasRegistradas !== undefined ? Number(data.horasRegistradas) : current.horasRegistradas;
+      const valorHora = data.valorHora !== undefined ? Number(data.valorHora) : current.valorHora;
+      const totalBruto = data.totalBruto !== undefined ? Number(data.totalBruto) : (
+        current.tipoContratacao === 'HORISTA' ? horasRegistradas * valorHora : current.totalBruto
+      );
+      const diasTransporte = data.diasTransporte !== undefined ? Number(data.diasTransporte) : (current.diasTransporte || 0);
+      const valorDiarioTransporte = data.valorDiarioTransporte !== undefined ? Number(data.valorDiarioTransporte) : (current.valorDiarioTransporte || 11.0);
+      const passagem = data.passagem !== undefined ? Number(data.passagem) : (diasTransporte * valorDiarioTransporte);
+      const outrosBeneficios = data.outrosBeneficios !== undefined ? Number(data.outrosBeneficios) : (current.outrosBeneficios || 0);
+      const beneficios = data.beneficios !== undefined ? Number(data.beneficios) : (passagem + outrosBeneficios);
+      const descontos = data.descontos !== undefined ? Number(data.descontos) : current.descontos;
+      const liquidoPagar = totalBruto + beneficios - descontos;
+
+      const updatedFolha: FolhaAula = {
+        ...current,
+        ...data,
+        horasRegistradas,
+        valorHora,
+        totalBruto,
+        diasTransporte,
+        valorDiarioTransporte,
+        passagem,
+        outrosBeneficios,
+        beneficios,
+        descontos,
+        liquidoPagar,
+      };
+
+      list[index] = updatedFolha;
+      setStored(STORAGE_KEYS.FOLHAS, list);
+      return updatedFolha;
+    }
+
+    const nextId = list.length > 0 ? Math.max(...list.map((f) => f.id)) + 1 : 1;
+    const newFolha: FolhaAula = {
+      id: nextId,
+      colaboradorId: data.colaboradorId || 1,
+      colaboradorNome: data.colaboradorNome || 'Colaborador',
+      colaboradorFuncao: data.colaboradorFuncao || 'Instrutor',
+      colaboradorFotoUrl: data.colaboradorFotoUrl,
+      tipoContratacao: data.tipoContratacao || 'HORISTA',
+      mesReferencia: data.mesReferencia || '2026-10',
+      horasRegistradas: data.horasRegistradas || 0,
+      valorHora: data.valorHora || 50,
+      totalBruto: data.totalBruto || 0,
+      beneficios: data.beneficios || 0,
+      passagem: data.passagem || 0,
+      diasTransporte: data.diasTransporte || 0,
+      valorDiarioTransporte: data.valorDiarioTransporte || 11,
+      outrosBeneficios: data.outrosBeneficios || 0,
+      descontos: data.descontos || 0,
+      liquidoPagar: data.liquidoPagar || 0,
+      status: data.status || 'PENDENTE',
+    };
+    list.push(newFolha);
+    setStored(STORAGE_KEYS.FOLHAS, list);
+    return newFolha;
+  },
+
+  updateFolhaStatus(
+    id: number,
+    status: 'PAGO' | 'PENDENTE',
+    dadosPagamento?: {
+      dataPagamento?: string;
+      formaPagamento?: FormaPagamento;
+      comprovanteUrl?: string;
+      comprovanteNome?: string;
+      comprovanteTipo?: 'FOTO' | 'ARQUIVO' | 'URL';
+      lancamentoFinanceiroId?: number;
+    }
+  ): FolhaAula {
     const list = getStored<FolhaAula[]>(STORAGE_KEYS.FOLHAS, INITIAL_FOLHAS);
     const index = list.findIndex(f => f.id === id);
     if (index !== -1) {
       list[index].status = status;
       if (status === 'PAGO') {
-        list[index].dataPagamento = new Date().toISOString().split('T')[0];
+        list[index].dataPagamento = dadosPagamento?.dataPagamento || new Date().toISOString().split('T')[0];
+        if (dadosPagamento?.formaPagamento) list[index].formaPagamento = dadosPagamento.formaPagamento;
+        if (dadosPagamento?.comprovanteUrl) list[index].comprovanteUrl = dadosPagamento.comprovanteUrl;
+        if (dadosPagamento?.comprovanteNome) list[index].comprovanteNome = dadosPagamento.comprovanteNome;
+        if (dadosPagamento?.comprovanteTipo) list[index].comprovanteTipo = dadosPagamento.comprovanteTipo;
+        if (dadosPagamento?.lancamentoFinanceiroId) list[index].lancamentoFinanceiroId = dadosPagamento.lancamentoFinanceiroId;
+      } else {
+        list[index].dataPagamento = undefined;
+        list[index].comprovanteUrl = undefined;
+        list[index].comprovanteNome = undefined;
+        list[index].comprovanteTipo = undefined;
+        list[index].lancamentoFinanceiroId = undefined;
       }
       setStored(STORAGE_KEYS.FOLHAS, list);
       return list[index];
     }
     throw new Error('Folha não encontrada');
+  },
+
+  getTetoOrcamentario(): TetoConfig {
+    const DEFAULT_TETO: TetoConfig = {
+      total: 90000.0,
+      anual: 180000.0,
+      mensal: 15000.0,
+      diario: 750.0,
+      duracaoMeses: 6,
+    };
+    try {
+      const stored = localStorage.getItem('portofc_teto_config');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          const mensal = Number(parsed.mensal) || 15000.0;
+          const duracaoMeses = Number(parsed.duracaoMeses) || 6;
+          return {
+            total: Number(parsed.total) || mensal * duracaoMeses,
+            anual: Number(parsed.anual) || Number(parsed.semestral ? parsed.semestral * 2 : mensal * 12),
+            mensal,
+            diario: Number(parsed.diario) || Number((mensal / 20).toFixed(2)),
+            duracaoMeses,
+          };
+        }
+      }
+      // Fallback retrocompatibilidade com versão anterior
+      const oldStored = localStorage.getItem('portofc_teto_salarios');
+      if (oldStored) {
+        const val = parseFloat(oldStored);
+        if (!isNaN(val) && val > 0) {
+          return {
+            total: val * 12,
+            anual: val * 12,
+            mensal: val,
+            diario: Number((val / 20).toFixed(2)),
+          };
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return DEFAULT_TETO;
+  },
+
+  setTetoOrcamentario(teto: TetoConfig): TetoConfig {
+    try {
+      localStorage.setItem('portofc_teto_config', JSON.stringify(teto));
+      localStorage.setItem('portofc_teto_salarios', String(teto.mensal));
+    } catch (e) {
+      console.error('Erro ao salvar teto orçamentário', e);
+    }
+    return teto;
   },
 
   getLancamentos(tipo?: 'ENTRADA' | 'SAIDA', status?: string, categoria?: string): LancamentoFinanceiro[] {
@@ -239,6 +490,8 @@ export const MockStorage = {
       formaPagamento: data.formaPagamento || 'PIX',
       status: data.status || 'PENDENTE',
       comprovanteUrl: data.comprovanteUrl,
+      comprovanteNome: data.comprovanteNome,
+      comprovanteTipo: data.comprovanteTipo,
       dataCriacao: new Date().toISOString().split('T')[0],
     };
     list.unshift(newLanc);

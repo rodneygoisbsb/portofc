@@ -315,6 +315,8 @@ public class DataSeeder implements CommandLineRunner {
                 .beneficios(BigDecimal.valueOf(250.00)) // Auxílio transporte
                 .status(StatusColaborador.ATIVO)
                 .fotoUrl("https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80")
+                .dataNascimento(LocalDate.of(1987, 10, 20))
+                .chavePix("312.445.678-90")
                 .build());
 
         // Professor 2 (Horista - R$ 60,00/h)
@@ -329,6 +331,8 @@ public class DataSeeder implements CommandLineRunner {
                 .beneficios(BigDecimal.valueOf(300.00))
                 .status(StatusColaborador.ATIVO)
                 .fotoUrl("https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80")
+                .dataNascimento(LocalDate.of(1984, 10, 23))
+                .chavePix("marcelo.vasconcelos@portofc.org.br")
                 .build());
 
         // Coordenador (Mensalista - R$ 4.500,00)
@@ -343,6 +347,8 @@ public class DataSeeder implements CommandLineRunner {
                 .beneficios(BigDecimal.valueOf(500.00))
                 .status(StatusColaborador.ATIVO)
                 .fotoUrl("https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80")
+                .dataNascimento(LocalDate.of(1981, 5, 14))
+                .chavePix("+5561993334455")
                 .build());
 
         // Apoio Administrativo (Mensalista - R$ 2.200,00)
@@ -357,6 +363,8 @@ public class DataSeeder implements CommandLineRunner {
                 .beneficios(BigDecimal.valueOf(350.00))
                 .status(StatusColaborador.ATIVO)
                 .fotoUrl("https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80")
+                .dataNascimento(LocalDate.of(1993, 8, 30))
+                .chavePix("camila.duarte@portofc.org.br")
                 .build());
 
         List<Colaborador> salvos = colaboradorRepository.saveAll(colaboradores);
@@ -371,6 +379,10 @@ public class DataSeeder implements CommandLineRunner {
                 .horasRegistradas(BigDecimal.valueOf(40))
                 .valorHora(BigDecimal.valueOf(50.00))
                 .totalBruto(BigDecimal.valueOf(2000.00))
+                .diasTransporte(16)
+                .valorDiarioTransporte(BigDecimal.valueOf(11.00))
+                .passagem(BigDecimal.valueOf(176.00))
+                .outrosBeneficios(BigDecimal.valueOf(74.00))
                 .beneficios(BigDecimal.valueOf(250.00))
                 .descontos(BigDecimal.valueOf(150.00))
                 .liquidoPagar(BigDecimal.valueOf(2100.00))
@@ -385,6 +397,10 @@ public class DataSeeder implements CommandLineRunner {
                 .horasRegistradas(BigDecimal.valueOf(48))
                 .valorHora(BigDecimal.valueOf(60.00))
                 .totalBruto(BigDecimal.valueOf(2880.00))
+                .diasTransporte(20)
+                .valorDiarioTransporte(BigDecimal.valueOf(11.00))
+                .passagem(BigDecimal.valueOf(220.00))
+                .outrosBeneficios(BigDecimal.valueOf(80.00))
                 .beneficios(BigDecimal.valueOf(300.00))
                 .descontos(BigDecimal.valueOf(200.00))
                 .liquidoPagar(BigDecimal.valueOf(2980.00))
@@ -398,6 +414,10 @@ public class DataSeeder implements CommandLineRunner {
                 .horasRegistradas(BigDecimal.valueOf(160))
                 .valorHora(BigDecimal.valueOf(28.12))
                 .totalBruto(BigDecimal.valueOf(4500.00))
+                .diasTransporte(22)
+                .valorDiarioTransporte(BigDecimal.valueOf(11.00))
+                .passagem(BigDecimal.valueOf(242.00))
+                .outrosBeneficios(BigDecimal.valueOf(258.00))
                 .beneficios(BigDecimal.valueOf(500.00))
                 .descontos(BigDecimal.valueOf(450.00))
                 .liquidoPagar(BigDecimal.valueOf(4550.00))
@@ -412,6 +432,10 @@ public class DataSeeder implements CommandLineRunner {
                 .horasRegistradas(BigDecimal.valueOf(160))
                 .valorHora(BigDecimal.valueOf(13.75))
                 .totalBruto(BigDecimal.valueOf(2200.00))
+                .diasTransporte(20)
+                .valorDiarioTransporte(BigDecimal.valueOf(11.00))
+                .passagem(BigDecimal.valueOf(220.00))
+                .outrosBeneficios(BigDecimal.valueOf(130.00))
                 .beneficios(BigDecimal.valueOf(350.00))
                 .descontos(BigDecimal.valueOf(180.00))
                 .liquidoPagar(BigDecimal.valueOf(2370.00))

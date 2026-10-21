@@ -43,6 +43,18 @@ public class FolhaAula {
     @Builder.Default
     private BigDecimal beneficios = BigDecimal.ZERO;
 
+    @Column(name = "passagem", precision = 10, scale = 2)
+    private BigDecimal passagem;
+
+    @Column(name = "dias_transporte")
+    private Integer diasTransporte;
+
+    @Column(name = "valor_diario_transporte", precision = 10, scale = 2)
+    private BigDecimal valorDiarioTransporte;
+
+    @Column(name = "outros_beneficios", precision = 10, scale = 2)
+    private BigDecimal outrosBeneficios;
+
     @Column(precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal descontos = BigDecimal.ZERO;

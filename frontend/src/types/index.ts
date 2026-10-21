@@ -66,6 +66,8 @@ export interface Colaborador {
   status: StatusColaborador;
   fotoUrl?: string;
   dataAdmissao?: string;
+  dataNascimento?: string;
+  chavePix?: string;
 }
 
 export interface FolhaAula {
@@ -74,15 +76,25 @@ export interface FolhaAula {
   colaboradorNome: string;
   colaboradorFuncao: string;
   colaboradorFotoUrl?: string;
+  tipoContratacao?: TipoContratacao;
   mesReferencia: string;
   horasRegistradas: number;
   valorHora: number;
   totalBruto: number;
   beneficios: number;
+  passagem?: number;
+  diasTransporte?: number;
+  valorDiarioTransporte?: number;
+  outrosBeneficios?: number;
   descontos: number;
   liquidoPagar: number;
   status: StatusFolha;
   dataPagamento?: string;
+  formaPagamento?: FormaPagamento;
+  comprovanteUrl?: string;
+  comprovanteNome?: string;
+  comprovanteTipo?: 'FOTO' | 'ARQUIVO' | 'URL';
+  lancamentoFinanceiroId?: number;
 }
 
 export interface LancamentoFinanceiro {
@@ -96,6 +108,10 @@ export interface LancamentoFinanceiro {
   formaPagamento?: FormaPagamento;
   status: StatusFinanceiro;
   comprovanteUrl?: string;
+  comprovanteNome?: string;
+  comprovanteTipo?: 'FOTO' | 'ARQUIVO' | 'URL';
+  colaboradorId?: number;
+  folhaId?: number;
   dataCriacao?: string;
 }
 
@@ -140,4 +156,12 @@ export interface Uniforme {
   quantidadeEntregue: number;
   saldoEstoque: number;
   descricao?: string;
+}
+
+export interface TetoConfig {
+  total: number;
+  anual: number;
+  mensal: number;
+  diario: number;
+  duracaoMeses?: number;
 }

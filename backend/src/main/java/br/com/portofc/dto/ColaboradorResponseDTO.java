@@ -28,4 +28,6 @@ public class ColaboradorResponseDTO {
     private StatusColaborador status;
     private String fotoUrl;
     private LocalDate dataAdmissao;
+    private LocalDate dataNascimento;
+    private String chavePix;
 }

@@ -59,4 +59,10 @@ public class Colaborador {
     @Column(name = "data_admissao")
     @Builder.Default
     private LocalDate dataAdmissao = LocalDate.now();
+
+    @Column(name = "data_nascimento")
+    private LocalDate dataNascimento;
+
+    @Column(name = "chave_pix", length = 100)
+    private String chavePix;
 }

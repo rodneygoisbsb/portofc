@@ -19,11 +19,16 @@ public class FolhaAulaResponseDTO {
     private String colaboradorNome;
     private String colaboradorFuncao;
     private String colaboradorFotoUrl;
+    private br.com.portofc.model.enums.TipoContratacao tipoContratacao;
     private String mesReferencia;
     private BigDecimal horasRegistradas;
     private BigDecimal valorHora;
     private BigDecimal totalBruto;
     private BigDecimal beneficios;
+    private BigDecimal passagem;
+    private Integer diasTransporte;
+    private BigDecimal valorDiarioTransporte;
+    private BigDecimal outrosBeneficios;
     private BigDecimal descontos;
     private BigDecimal liquidoPagar;
     private StatusFolha status;

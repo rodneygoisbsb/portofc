@@ -62,6 +62,10 @@ public class FolhaAulaService {
         folha.setValorHora(valorHora);
         folha.setTotalBruto(totalBruto);
         folha.setBeneficios(beneficios);
+        folha.setPassagem(dto.getPassagem());
+        folha.setDiasTransporte(dto.getDiasTransporte());
+        folha.setValorDiarioTransporte(dto.getValorDiarioTransporte());
+        folha.setOutrosBeneficios(dto.getOutrosBeneficios());
         folha.setDescontos(descontos);
         folha.setLiquidoPagar(liquidoPagar);
         folha.setStatus(dto.getStatus() != null ? dto.getStatus() : StatusFolha.PENDENTE);
@@ -88,11 +92,16 @@ public class FolhaAulaService {
                 .colaboradorNome(f.getColaborador().getNome())
                 .colaboradorFuncao(f.getColaborador().getFuncao())
                 .colaboradorFotoUrl(f.getColaborador().getFotoUrl())
+                .tipoContratacao(f.getColaborador().getTipoContratacao())
                 .mesReferencia(f.getMesReferencia())
                 .horasRegistradas(f.getHorasRegistradas())
                 .valorHora(f.getValorHora())
                 .totalBruto(f.getTotalBruto())
                 .beneficios(f.getBeneficios())
+                .passagem(f.getPassagem())
+                .diasTransporte(f.getDiasTransporte())
+                .valorDiarioTransporte(f.getValorDiarioTransporte())
+                .outrosBeneficios(f.getOutrosBeneficios())
                 .descontos(f.getDescontos())
                 .liquidoPagar(f.getLiquidoPagar())
                 .status(f.getStatus())

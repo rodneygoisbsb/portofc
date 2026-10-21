@@ -53,6 +53,8 @@ public class ColaboradorService {
                 .status(dto.getStatus() != null ? dto.getStatus() : StatusColaborador.ATIVO)
                 .fotoUrl(dto.getFotoUrl())
                 .dataAdmissao(LocalDate.now())
+                .dataNascimento(dto.getDataNascimento())
+                .chavePix(dto.getChavePix())
                 .build();
 
         Colaborador salvo = colaboradorRepository.save(colaborador);
@@ -79,6 +81,8 @@ public class ColaboradorService {
         if (dto.getFotoUrl() != null) {
             colab.setFotoUrl(dto.getFotoUrl());
         }
+        colab.setDataNascimento(dto.getDataNascimento());
+        colab.setChavePix(dto.getChavePix());
 
         Colaborador atualizado = colaboradorRepository.save(colab);
         return toResponseDTO(atualizado);
@@ -107,6 +111,8 @@ public class ColaboradorService {
                 .status(c.getStatus())
                 .fotoUrl(c.getFotoUrl())
                 .dataAdmissao(c.getDataAdmissao())
+                .dataNascimento(c.getDataNascimento())
+                .chavePix(c.getChavePix())
                 .build();
     }
 }

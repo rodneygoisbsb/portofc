@@ -26,6 +26,10 @@ public class FolhaAulaRequestDTO {
     private BigDecimal horasRegistradas;
     private BigDecimal valorHora;
     private BigDecimal beneficios;
+    private BigDecimal passagem;
+    private Integer diasTransporte;
+    private BigDecimal valorDiarioTransporte;
+    private BigDecimal outrosBeneficios;
     private BigDecimal descontos;
     private StatusFolha status;
     private LocalDate dataPagamento;

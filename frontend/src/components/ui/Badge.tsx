@@ -1,6 +1,6 @@
 import React from 'react';
 
-type BadgeVariant = 'success' | 'warning' | 'info' | 'danger' | 'neutral' | 'emerald';
+type BadgeVariant = 'success' | 'warning' | 'info' | 'danger' | 'neutral' | 'emerald' | 'purple';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -16,6 +16,7 @@ export const Badge: React.FC<BadgeProps> = ({ children, variant = 'neutral', cla
     info: 'bg-blue-50 text-blue-700 border-blue-200/60',
     danger: 'bg-rose-50 text-rose-700 border-rose-200/60',
     neutral: 'bg-slate-100 text-slate-700 border-slate-200/60',
+    purple: 'bg-purple-50 text-purple-700 border-purple-200/60',
   };
 
   return (
