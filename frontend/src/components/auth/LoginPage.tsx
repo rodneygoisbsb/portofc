@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, UserCheck, AlertCircle } from 'lucide-react';
+import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, UserCheck, AlertCircle, User, Briefcase, UserPlus } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { login, loginGoogle } = useAuth();
+  const { login, register, loginGoogle } = useAuth();
+  
+  // Modo da tela: 'login' ou 'cadastro'
+  const [mode, setMode] = useState<'login' | 'cadastro'>('login');
+
+  // Estados de formulário
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [nome, setNome] = useState('');
+  const [cargo, setCargo] = useState('Gestora Financeira & Prestação de Contas');
+  
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
       setErrorMsg('Por favor, informe seu e-mail institucional.');
@@ -27,26 +36,49 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nome.trim()) {
+      setErrorMsg('Por favor, informe seu nome completo.');
+      return;
+    }
+    if (!email.trim()) {
+      setErrorMsg('Por favor, informe seu e-mail.');
+      return;
+    }
+    if (senha && senha !== confirmarSenha) {
+      setErrorMsg('As senhas digitadas não coincidem.');
+      return;
+    }
+    setErrorMsg('');
+    setIsLoading(true);
+    try {
+      await register(nome, email, cargo, senha);
+    } catch (err: any) {
+      setErrorMsg('Não foi possível concluir o cadastro.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
     setErrorMsg('');
     setIsLoading(true);
     try {
       await loginGoogle(undefined, email || 'tainara@portofc.org.br');
-    } catch (err: any) {
-      setErrorMsg('Falha ao autenticar com o Google. Tente novamente.');
+    } catch {
+      setErrorMsg('Falha ao autenticar com o Google.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleQuickLogin = async (userEmail: string) => {
-    setEmail(userEmail);
-    setSenha('123456');
     setErrorMsg('');
     setIsLoading(true);
     try {
       await login(userEmail, '123456');
-    } catch (err: any) {
+    } catch {
       setErrorMsg('Falha no acesso rápido.');
     } finally {
       setIsLoading(false);
@@ -59,13 +91,13 @@ export const LoginPage: React.FC = () => {
       <div className="absolute top-1/4 -left-20 w-96 h-96 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md relative z-10">
+      <div className="w-full max-w-lg relative z-10 my-4">
         {/* Main Card */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-black/40">
+        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-black/50">
           
           {/* Header & Logo */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white shadow-lg shadow-emerald-500/20 mb-4 ring-4 ring-slate-800/80">
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white shadow-lg shadow-emerald-500/20 mb-3 ring-4 ring-slate-800/80">
               <Shield size={32} className="stroke-[2.2]" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -76,74 +108,213 @@ export const LoginPage: React.FC = () => {
             </p>
           </div>
 
+          {/* Tab Selector: Entrar vs Cadastrar */}
+          <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-800/70 rounded-2xl border border-slate-700/60 mb-6">
+            <button
+              type="button"
+              onClick={() => { setMode('login'); setErrorMsg(''); }}
+              className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                mode === 'login'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <UserCheck size={16} />
+              <span>Já tenho conta (Entrar)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMode('cadastro'); setErrorMsg(''); }}
+              className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                mode === 'cadastro'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <UserPlus size={16} />
+              <span>Criar Conta (Cadastro)</span>
+            </button>
+          </div>
+
           {/* Error Alert */}
           {errorMsg && (
-            <div className="mb-6 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-2.5 text-rose-400 text-xs sm:text-sm">
+            <div className="mb-5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-2.5 text-rose-400 text-xs sm:text-sm animate-in fade-in duration-200">
               <AlertCircle size={18} className="shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                E-mail Institucional
-              </label>
-              <div className="relative">
-                <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ex: tainara@portofc.org.br"
-                  required
-                  className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
-                />
+          {/* FORMULÁRIO DE LOGIN */}
+          {mode === 'login' ? (
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  E-mail Institucional
+                </label>
+                <div className="relative">
+                  <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="ex: tainara@portofc.org.br"
+                    required
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Senha de Acesso
-              </label>
-              <div className="relative">
-                <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Senha
+                </label>
+                <div className="relative">
+                  <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>Entrar no Sistema</span>
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>Entrar no Sistema</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </form>
+          ) : (
+            /* FORMULÁRIO DE CADASTRO */
+            <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Nome Completo
+                </label>
+                <div className="relative">
+                  <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    placeholder="Seu nome completo"
+                    required
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  E-mail
+                </label>
+                <div className="relative">
+                  <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu.email@portofc.org.br"
+                    required
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Cargo / Função
+                </label>
+                <div className="relative">
+                  <Briefcase size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                  <select
+                    value={cargo}
+                    onChange={(e) => setCargo(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all cursor-pointer"
+                  >
+                    <option value="Gestora Financeira & Prestação de Contas">Gestora Financeira & Prestação de Contas</option>
+                    <option value="Gerente Geral">Gerente Geral</option>
+                    <option value="Professor de Futebol (Sub-7 a Sub-9)">Professor de Futebol (Sub-7 a Sub-9)</option>
+                    <option value="Professor Técnico Principal (Sub-15 a Adulto)">Professor Técnico Principal (Sub-15 a Adulto)</option>
+                    <option value="Coordenador Pedagógico e Esportivo">Coordenador Pedagógico e Esportivo</option>
+                    <option value="Assistente Administrativo(a)">Assistente Administrativo(a)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                    Senha
+                  </label>
+                  <div className="relative">
+                    <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      type="password"
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      placeholder="Mín. 6 dígitos"
+                      required
+                      className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                    Confirmar
+                  </label>
+                  <div className="relative">
+                    <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      type="password"
+                      value={confirmarSenha}
+                      onChange={(e) => setConfirmarSenha(e.target.value)}
+                      placeholder="Repita a senha"
+                      required
+                      className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>Criar Minha Conta</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
 
           {/* Divider */}
-          <div className="relative my-6 text-center">
+          <div className="relative my-5 text-center">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-800" />
             </div>
@@ -152,14 +323,13 @@ export const LoginPage: React.FC = () => {
             </span>
           </div>
 
-          {/* Google Login Button */}
+          {/* Google Auth Button */}
           <button
             type="button"
-            onClick={handleGoogleLogin}
+            onClick={handleGoogleAuth}
             disabled={isLoading}
-            className="w-full bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-colors cursor-pointer disabled:opacity-50"
+            className="w-full bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-white font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-3 transition-colors cursor-pointer disabled:opacity-50"
           >
-            {/* Official Google multicolored G logo SVG */}
             <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -178,12 +348,14 @@ export const LoginPage: React.FC = () => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span className="text-sm">Entrar com o Google</span>
+            <span className="text-sm">
+              {mode === 'login' ? 'Entrar com o Google' : 'Cadastrar com o Google'}
+            </span>
           </button>
 
           {/* Quick Demo Access Roles */}
-          <div className="mt-8 pt-6 border-t border-slate-800/80">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-3 flex items-center justify-center gap-1.5">
+          <div className="mt-6 pt-5 border-t border-slate-800/80">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-2.5 flex items-center justify-center gap-1.5">
               <UserCheck size={14} className="text-emerald-400" />
               <span>Acesso Rápido para a Equipe:</span>
             </p>
@@ -224,7 +396,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* Security Badge */}
-          <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
+          <div className="mt-5 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
             <ShieldCheck size={14} className="text-emerald-500" />
             <span>Autenticação protegida via Backend Spring Boot & PostgreSQL</span>
           </div>

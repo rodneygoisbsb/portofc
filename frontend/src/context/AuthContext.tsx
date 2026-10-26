@@ -6,6 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, senha?: string) => Promise<UserSession>;
+  register: (nome: string, email: string, cargo: string, senha?: string) => Promise<UserSession>;
   loginGoogle: (googleCredential?: string, email?: string) => Promise<UserSession>;
   logout: () => void;
 }
@@ -17,33 +18,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
+    try {
+      const currentUser = authService.getCurrentUser();
+      if (currentUser) {
+        setUser(currentUser);
+      }
+    } catch (e) {
+      console.warn('Erro ao restaurar sessão', e);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const login = async (email: string, senha?: string): Promise<UserSession> => {
-    setIsLoading(true);
-    try {
-      const session = await authService.login(email, senha);
-      setUser(session);
-      return session;
-    } finally {
-      setIsLoading(false);
-    }
+    const session = await authService.login(email, senha);
+    setUser(session);
+    return session;
+  };
+
+  const register = async (nome: string, email: string, cargo: string, senha?: string): Promise<UserSession> => {
+    const session = await authService.register(nome, email, cargo, senha);
+    setUser(session);
+    return session;
   };
 
   const loginGoogle = async (googleCredential?: string, email?: string): Promise<UserSession> => {
-    setIsLoading(true);
-    try {
-      const session = await authService.loginGoogle(googleCredential, email);
-      setUser(session);
-      return session;
-    } finally {
-      setIsLoading(false);
-    }
+    const session = await authService.loginGoogle(googleCredential, email);
+    setUser(session);
+    return session;
   };
 
   const logout = () => {
@@ -58,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isLoading,
         login,
+        register,
         loginGoogle,
         logout,
       }}
