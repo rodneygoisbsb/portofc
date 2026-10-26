@@ -89,8 +89,8 @@ export const LoginPage: React.FC = () => {
           
           {/* Header & Logo */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-28 h-28 rounded-2xl bg-white p-3 shadow-lg shadow-black/30 mb-3 ring-4 ring-slate-800">
-              <img src="/logo.png" alt="Logo Oficial PORTO FC" className="w-full h-full object-contain" />
+            <div className="inline-flex items-center justify-center w-32 h-32 rounded-3xl bg-white p-2 shadow-xl shadow-black/30 mb-4 ring-4 ring-slate-800/80 overflow-hidden">
+              <img src="/logo.png" alt="Logo Oficial PORTO FC" className="w-full h-full object-contain scale-125" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               PORTO <span className="text-emerald-400">FC</span>

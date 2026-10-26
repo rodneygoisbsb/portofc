@@ -40,8 +40,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
     <aside className="w-64 bg-white border-r border-slate-100 flex flex-col shrink-0 h-screen sticky top-0">
       {/* Brand Header */}
       <div className="p-5 border-b border-slate-100 flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center p-1 overflow-hidden shrink-0">
-          <img src="/logo.png" alt="Logo PORTO FC" className="w-full h-full object-contain" />
+        <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center p-0.5 overflow-hidden shrink-0">
+          <img src="/logo.png" alt="Logo PORTO FC" className="w-full h-full object-contain scale-125" />
         </div>
         <div>
           <h1 className="font-bold text-lg text-slate-900 tracking-tight leading-none">
