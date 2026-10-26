@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Search, Bell, LogOut, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface TopbarProps {
   onSearch?: (term: string) => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({ onSearch }) => {
+  const { user, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -76,19 +78,27 @@ export const Topbar: React.FC<TopbarProps> = ({ onSearch }) => {
           )}
         </div>
 
-        {/* Admin Profile */}
+        {/* Authenticated User Profile */}
         <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-            ADM
-          </div>
+          {user?.fotoUrl ? (
+            <img
+              src={user.fotoUrl}
+              alt={user.nome}
+              className="w-10 h-10 rounded-xl object-cover shadow-sm ring-2 ring-slate-100"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+              {user?.nome ? user.nome.substring(0, 2).toUpperCase() : 'FC'}
+            </div>
+          )}
           <div className="hidden sm:block">
-            <p className="text-sm font-semibold text-slate-800 leading-none">Diretoria Executiva</p>
-            <p className="text-xs text-slate-400 mt-1">Gestão PORTO FC</p>
+            <p className="text-sm font-semibold text-slate-800 leading-none">{user?.nome || 'Usuário'}</p>
+            <p className="text-xs text-slate-400 mt-1 truncate max-w-[160px]">{user?.cargo || 'PORTO FC'}</p>
           </div>
           <button
-            title="Sair"
+            title="Sair do Sistema"
             className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors ml-1 cursor-pointer"
-            onClick={() => alert('Sessão administrativa mantida ativa para desenvolvimento local.')}
+            onClick={logout}
           >
             <LogOut size={18} />
           </button>

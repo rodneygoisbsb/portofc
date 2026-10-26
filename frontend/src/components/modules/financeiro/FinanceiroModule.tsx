@@ -142,6 +142,35 @@ export const FinanceiroModule: React.FC = () => {
   const [editingLancamento, setEditingLancamento] = useState<LancamentoFinanceiro | null>(null);
   const [form, setForm] = useState<LancamentoFormData>(initialFormState);
 
+  // Lista dinâmica de categorias cadastradas (inicia com as padrões e permite novas)
+  const [categorias, setCategorias] = useState<{ id: string; nome: string }[]>(() => {
+    const padroes = [
+      { id: 'MATERIAIS', nome: 'Materiais Esportivos' },
+      { id: 'UNIFORMES', nome: 'Uniformes' },
+      { id: 'SALARIOS', nome: 'Salários / Folha' },
+      { id: 'TORNEIOS', nome: 'Torneios' },
+      { id: 'EVENTOS', nome: 'Eventos' },
+      { id: 'ADMINISTRATIVO', nome: 'Administrativo' },
+      { id: 'REPASSES', nome: 'Repasses Públicos' },
+      { id: 'DOACOES', nome: 'Doações' },
+      { id: 'PATROCINIOS', nome: 'Patrocínios' },
+    ];
+    try {
+      const saved = localStorage.getItem('portofc_categorias_financeiras');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar categorias salvas', e);
+    }
+    return padroes;
+  });
+
+  // Estado para inserção de nova categoria inline
+  const [isAddingNovaCategoria, setIsAddingNovaCategoria] = useState(false);
+  const [novaCategoriaNome, setNovaCategoriaNome] = useState('');
+
   // Referência para os botões do cabeçalho e estado de visibilidade da barra fixa no topo
   const topActionsRef = useRef<HTMLDivElement>(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
@@ -544,76 +573,76 @@ export const FinanceiroModule: React.FC = () => {
     const getRubricaIcon = (id: string) => {
       switch (id) {
         case 'SALARIOS':
-          return <Users size={15} className="text-blue-600" />;
+          return <Users size={14} className="text-blue-600" />;
         case 'UNIFORMES':
-          return <Package size={15} className="text-indigo-600" />;
+          return <Package size={14} className="text-indigo-600" />;
         case 'MATERIAIS':
-          return <Package size={15} className="text-emerald-600" />;
+          return <Package size={14} className="text-emerald-600" />;
         case 'TORNEIOS':
-          return <Trophy size={15} className="text-amber-600" />;
+          return <Trophy size={14} className="text-amber-600" />;
         case 'EVENTOS':
-          return <Calendar size={15} className="text-purple-600" />;
+          return <Calendar size={14} className="text-purple-600" />;
         case 'ADMINISTRATIVO':
-          return <FileText size={15} className="text-slate-600" />;
+          return <FileText size={14} className="text-slate-600" />;
         default:
-          return <DollarSign size={15} className="text-slate-500" />;
+          return <DollarSign size={14} className="text-slate-500" />;
       }
     };
 
     return (
       <Card noPadding className="border border-slate-200/80 shadow-xs overflow-hidden rounded-2xl bg-white">
-        {/* Cabeçalho Elegante e Moderno da Tabela */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-slate-50/80 via-white to-blue-50/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100/70 text-blue-700 flex items-center justify-center font-bold shadow-2xs border border-blue-200/60 shrink-0">
-              <Landmark size={20} />
+        {/* Cabeçalho Elegante e Compacto da Tabela */}
+        <div className="p-3.5 sm:p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-gradient-to-r from-slate-50/80 via-white to-blue-50/30">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-100/70 text-blue-700 flex items-center justify-center font-bold shadow-2xs border border-blue-200/60 shrink-0">
+              <Landmark size={17} />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
                   Matriz Orçamentária & Prestação de Contas Governamental
                 </h3>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/70">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/70">
                   {subPeriodoSemestre === 'JAN_JUN' && periodoMatriz === 'SEMESTRAL' ? 'Janeiro a Junho' : periodoTotalLinha}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-[11px] text-slate-500">
                 Demonstrativo de execução por rubricas orçamentárias pactuadas da emenda parlamentar.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-600 bg-white border border-slate-200 px-3 py-1 rounded-xl shadow-2xs">
-              {rubricasCalculadas.length} {rubricasCalculadas.length === 1 ? 'rubrica exibida' : 'rubricas orçamentárias'}
+            <span className="text-[11px] font-semibold text-slate-600 bg-white border border-slate-200 px-2.5 py-0.5 rounded-lg shadow-2xs">
+              {rubricasCalculadas.length} {rubricasCalculadas.length === 1 ? 'rubrica' : 'rubricas'}
             </span>
           </div>
         </div>
 
-        {/* Tabela com scroll horizontal responsivo e visual moderno */}
+        {/* Tabela compacta perfeitamente ajustada à largura */}
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-slate-600 border-separate border-spacing-0">
-            <thead className="sticky top-0 z-20 bg-slate-50/90 backdrop-blur-xs text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+          <table className="w-full text-xs text-slate-600 border-separate border-spacing-0">
+            <thead className="sticky top-0 z-20 bg-slate-50/90 backdrop-blur-xs text-[11px] font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-200">
               <tr>
-                <th className="py-3.5 px-5 text-left font-semibold border-b border-slate-200/80 whitespace-nowrap">
-                  Categoria / Rubrica Orçamentária
+                <th className="py-2.5 px-3 text-left font-semibold border-b border-slate-200/80 whitespace-nowrap">
+                  Categoria / Rubrica
                 </th>
-                <th className="py-3.5 px-4 text-center font-semibold border-b border-slate-200/80 whitespace-nowrap">
-                  Período / Meses
+                <th className="py-2.5 px-2 text-center font-semibold border-b border-slate-200/80 whitespace-nowrap">
+                  Período
                 </th>
-                <th className="py-3.5 px-4 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap">
-                  Orçamento Previsto (R$)
+                <th className="py-2.5 px-2.5 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap">
+                  Previsto
                 </th>
-                <th className="py-3.5 px-4 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap">
-                  Comprometido (R$)
+                <th className="py-2.5 px-2.5 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap">
+                  Comprometido
                 </th>
-                <th className="py-3.5 px-4 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap">
-                  Realizado Pago (R$)
+                <th className="py-2.5 px-2.5 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap">
+                  Realizado
                 </th>
-                <th className="py-3.5 px-4 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap">
-                  Saldo Restante (R$)
+                <th className="py-2.5 px-2.5 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap">
+                  Saldo Restante
                 </th>
-                <th className="py-3.5 px-5 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap w-44">
+                <th className="py-2.5 px-3 text-right font-semibold border-b border-slate-200/80 whitespace-nowrap w-28 sm:w-36">
                   % Execução
                 </th>
               </tr>
@@ -621,42 +650,42 @@ export const FinanceiroModule: React.FC = () => {
             <tbody className="divide-y divide-slate-100 bg-white">
               {rubricasCalculadas.map((r) => (
                 <tr key={r.id} className="hover:bg-slate-50/60 transition-colors">
-                  <td className="py-3.5 px-5 text-left border-b border-slate-100 whitespace-nowrap">
-                    <div className="flex items-center gap-2.5">
-                      <span className="p-1.5 rounded-lg bg-slate-50 border border-slate-200/60">
+                  <td className="py-2.5 px-3 text-left border-b border-slate-100 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <span className="p-1 rounded bg-slate-50 border border-slate-200/60 shrink-0">
                         {getRubricaIcon(r.id)}
                       </span>
-                      <span className="font-semibold text-slate-900 text-sm">{r.nome}</span>
+                      <span className="font-semibold text-slate-900 text-xs">{r.nome}</span>
                     </div>
                   </td>
 
-                  <td className="py-3.5 px-4 text-center border-b border-slate-100 whitespace-nowrap">
-                    <span className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-lg">
+                  <td className="py-2.5 px-2 text-center border-b border-slate-100 whitespace-nowrap">
+                    <span className="text-[11px] font-medium text-slate-600 bg-slate-50 border border-slate-200/70 px-2 py-0.5 rounded-md">
                       {r.periodoLabelDinamico}
                     </span>
                   </td>
 
-                  <td className="py-3.5 px-4 text-right font-semibold text-slate-800 border-b border-slate-100 whitespace-nowrap">
+                  <td className="py-2.5 px-2.5 text-right font-semibold text-slate-800 border-b border-slate-100 whitespace-nowrap">
                     {formatBRL(r.previsto)}
                   </td>
 
-                  <td className="py-3.5 px-4 text-right font-medium text-amber-700 border-b border-slate-100 whitespace-nowrap">
+                  <td className="py-2.5 px-2.5 text-right font-medium text-amber-700 border-b border-slate-100 whitespace-nowrap">
                     {r.comprometido > 0 ? formatBRL(r.comprometido) : <span className="text-slate-400">R$ 0,00</span>}
                   </td>
 
-                  <td className="py-3.5 px-4 text-right font-bold text-blue-700 border-b border-slate-100 whitespace-nowrap">
+                  <td className="py-2.5 px-2.5 text-right font-bold text-blue-700 border-b border-slate-100 whitespace-nowrap">
                     {r.realizado > 0 ? formatBRL(r.realizado) : <span className="text-slate-400">R$ 0,00</span>}
                   </td>
 
-                  <td className="py-3.5 px-4 text-right border-b border-slate-100 whitespace-nowrap">
-                    <span className="inline-block px-2.5 py-1 rounded-lg font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 text-xs shadow-2xs">
+                  <td className="py-2.5 px-2.5 text-right border-b border-slate-100 whitespace-nowrap">
+                    <span className="inline-block px-2 py-0.5 rounded-md font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 text-[11px] shadow-2xs">
                       {formatBRL(r.saldoRestante)}
                     </span>
                   </td>
 
-                  <td className="py-3.5 px-5 text-right border-b border-slate-100 whitespace-nowrap">
-                    <div className="flex items-center gap-2 justify-end">
-                      <div className="w-16 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <td className="py-2.5 px-3 text-right border-b border-slate-100 whitespace-nowrap">
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <div className="w-12 sm:w-16 bg-slate-100 h-1.5 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-300 ${
                             r.pctExecucao > 100 ? 'bg-rose-500' : r.pctExecucao > 80 ? 'bg-amber-500' : 'bg-blue-600'
@@ -664,7 +693,7 @@ export const FinanceiroModule: React.FC = () => {
                           style={{ width: `${Math.min(100, r.pctExecucao)}%` }}
                         />
                       </div>
-                      <span className="font-bold text-xs text-slate-700 w-12 text-right">
+                      <span className="font-bold text-[11px] text-slate-700 min-w-10 text-right">
                         {r.pctExecucao.toFixed(1).replace('.', ',')}%
                       </span>
                     </div>
@@ -673,33 +702,33 @@ export const FinanceiroModule: React.FC = () => {
               ))}
             </tbody>
             <tfoot>
-              <tr className="bg-slate-50/90 font-bold text-slate-900 border-t-2 border-slate-200 text-xs sm:text-sm">
-                <td className="py-4 px-5 text-left uppercase tracking-wider">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-600" />
-                    <span>TOTAL GERAL DA EMENDA</span>
+              <tr className="bg-slate-50/90 font-bold text-slate-900 border-t-2 border-slate-200 text-xs">
+                <td className="py-3 px-3 text-left uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                    <span>TOTAL DA EMENDA</span>
                   </div>
                 </td>
-                <td className="py-4 px-4 text-center text-xs text-slate-600 font-semibold">
-                  <span className="bg-white border border-slate-200 px-2.5 py-1 rounded-lg">
+                <td className="py-3 px-2 text-center text-[11px] text-slate-600 font-semibold">
+                  <span className="bg-white border border-slate-200 px-2 py-0.5 rounded-md">
                     {periodoTotalLinha}
                   </span>
                 </td>
-                <td className="py-4 px-4 text-right text-slate-900 font-bold">
+                <td className="py-3 px-2.5 text-right text-slate-900 font-bold">
                   {formatBRL(totaisMatriz.previsto)}
                 </td>
-                <td className="py-4 px-4 text-right text-amber-700 font-bold">
+                <td className="py-3 px-2.5 text-right text-amber-700 font-bold">
                   {formatBRL(totaisMatriz.comprometido)}
                 </td>
-                <td className="py-4 px-4 text-right text-blue-700 font-bold">
+                <td className="py-3 px-2.5 text-right text-blue-700 font-bold">
                   {formatBRL(totaisMatriz.realizado)}
                 </td>
-                <td className="py-4 px-4 text-right">
-                  <span className="inline-block px-3 py-1 rounded-lg font-black text-emerald-900 bg-emerald-100/80 border border-emerald-300/80 text-xs sm:text-sm shadow-2xs">
+                <td className="py-3 px-2.5 text-right">
+                  <span className="inline-block px-2.5 py-0.5 rounded-md font-black text-emerald-900 bg-emerald-100/80 border border-emerald-300/80 text-xs shadow-2xs">
                     {formatBRL(totaisMatriz.saldoRestante)}
                   </span>
                 </td>
-                <td className="py-4 px-5 text-right font-black text-slate-900 text-xs sm:text-sm">
+                <td className="py-3 px-3 text-right font-black text-slate-900 text-xs">
                   {totaisMatriz.pctExecucao.toFixed(1).replace('.', ',')}%
                 </td>
               </tr>
@@ -1063,16 +1092,16 @@ export const FinanceiroModule: React.FC = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-600">
-                  <thead className="bg-slate-50/70 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <table className="w-full text-left text-xs text-slate-600">
+                  <thead className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                     <tr>
-                      <th className="py-4 px-6">Descrição</th>
-                      <th className="py-4 px-4">Categoria</th>
-                      <th className="py-4 px-4 text-center">Vencimento</th>
-                      <th className="py-4 px-4">Forma</th>
-                      <th className="py-4 px-4 text-center">Status</th>
-                      <th className="py-4 px-4 text-right">Valor</th>
-                      <th className="py-4 px-6 text-center">Ações</th>
+                      <th className="py-3 px-4">Descrição</th>
+                      <th className="py-3 px-3">Categoria</th>
+                      <th className="py-3 px-3 text-center">Vencimento</th>
+                      <th className="py-3 px-3">Forma</th>
+                      <th className="py-3 px-3 text-center">Status</th>
+                      <th className="py-3 px-3 text-right">Valor</th>
+                      <th className="py-3 px-4 text-center">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -1080,54 +1109,54 @@ export const FinanceiroModule: React.FC = () => {
                       const isEntrada = item.tipo === 'ENTRADA';
                       return (
                         <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
+                          <td className="py-2.5 px-4">
+                            <div className="flex items-center gap-2.5">
                               <div
-                                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                                   isEntrada ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                                 }`}
                               >
-                                {isEntrada ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                                {isEntrada ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                               </div>
-                              <div>
-                                <p className="font-semibold text-slate-900 leading-tight">{item.descricao}</p>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-slate-900 text-xs leading-tight truncate">{item.descricao}</p>
                                 {item.comprovanteUrl && (
                                   <a
                                     href={item.comprovanteUrl}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="text-[11px] text-blue-600 hover:underline inline-flex items-center gap-1 mt-1 font-medium"
+                                    className="text-[10px] text-blue-600 hover:underline inline-flex items-center gap-1 mt-0.5 font-medium"
                                     title="Abrir anexo / comprovante"
                                   >
                                     {item.comprovanteTipo === 'FOTO' || item.comprovanteUrl.startsWith('data:image') ? (
-                                      <Image size={12} className="text-blue-600" />
+                                      <Image size={11} className="text-blue-600" />
                                     ) : item.comprovanteTipo === 'URL' || item.comprovanteUrl.startsWith('http') ? (
-                                      <ExternalLink size={12} className="text-blue-600" />
+                                      <ExternalLink size={11} className="text-blue-600" />
                                     ) : (
-                                      <FileText size={12} className="text-blue-600" />
+                                      <FileText size={11} className="text-blue-600" />
                                     )}
-                                    <span>{item.comprovanteNome || 'Comprovante anexado'}</span>
+                                    <span className="truncate max-w-[140px]">{item.comprovanteNome || 'Comprovante'}</span>
                                   </a>
                                 )}
                               </div>
                             </div>
                           </td>
 
-                          <td className="py-4 px-4">
+                          <td className="py-2.5 px-3">
                             <Badge variant={item.categoria === 'SALARIOS' ? 'purple' : 'neutral'}>
-                              {item.categoria === 'SALARIOS' ? 'Salários / Folha' : item.categoria}
+                              {item.categoria === 'SALARIOS' ? 'Salários' : item.categoria}
                             </Badge>
                           </td>
 
-                          <td className="py-4 px-4 text-center text-xs text-slate-500">
+                          <td className="py-2.5 px-3 text-center text-[11px] text-slate-500 whitespace-nowrap">
                             {item.dataVencimento}
                           </td>
 
-                          <td className="py-4 px-4 text-xs font-medium text-slate-700">
+                          <td className="py-2.5 px-3 text-xs font-medium text-slate-700 whitespace-nowrap">
                             {item.formaPagamento || 'PIX'}
                           </td>
 
-                          <td className="py-4 px-4 text-center">
+                          <td className="py-2.5 px-3 text-center">
                             <Badge
                               variant={
                                 item.status === 'PAGO'
@@ -1142,30 +1171,30 @@ export const FinanceiroModule: React.FC = () => {
                           </td>
 
                           <td
-                            className={`py-4 px-4 text-right font-bold ${
+                            className={`py-2.5 px-3 text-right font-bold text-xs whitespace-nowrap ${
                               isEntrada ? 'text-emerald-600' : 'text-slate-900'
                             }`}
                           >
                             {isEntrada ? `+ ${formatBRL(item.valor)}` : `- ${formatBRL(item.valor)}`}
                           </td>
 
-                          <td className="py-4 px-6 text-center">
-                            <div className="flex items-center justify-center gap-1.5">
+                          <td className="py-2.5 px-4 text-center whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1">
                               <button
                                 type="button"
                                 onClick={() => handleOpenEditModal(item)}
-                                className="p-1.5 text-slate-500 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-all cursor-pointer border border-slate-200/80"
+                                className="p-1 text-slate-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all cursor-pointer border border-slate-200/80"
                                 title="Editar lançamento"
                               >
-                                <Edit size={14} />
+                                <Edit size={13} />
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleDeleteLancamento(item.id)}
-                                className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer border border-slate-200/80"
+                                className="p-1 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer border border-slate-200/80"
                                 title="Excluir lançamento"
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={13} />
                               </button>
                             </div>
                           </td>
@@ -1186,7 +1215,7 @@ export const FinanceiroModule: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         title={editingLancamento ? 'Editar Lançamento Financeiro' : 'Novo Lançamento Financeiro'}
         description="Preencha os dados da receita ou despesa para registro no livro-caixa da ONG PORTO FC."
-        maxWidth="lg"
+        maxWidth="xl"
       >
         <form onSubmit={handleSaveLancamento} className="space-y-4">
           {/* Seção de Comprovante / Anexo (Foto, Arquivo ou URL) */}
@@ -1371,24 +1400,106 @@ export const FinanceiroModule: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                Categoria <span className="text-rose-500">*</span>
-              </label>
-              <select
-                value={form.categoria}
-                onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-                className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 text-slate-700 cursor-pointer"
-              >
-                <option value="MATERIAIS">Materiais Esportivos</option>
-                <option value="UNIFORMES">Uniformes</option>
-                <option value="SALARIOS">Salários / Folha</option>
-                <option value="TORNEIOS">Torneios</option>
-                <option value="EVENTOS">Eventos</option>
-                <option value="ADMINISTRATIVO">Administrativo</option>
-                <option value="REPASSES">Repasses Públicos</option>
-                <option value="DOACOES">Doações</option>
-                <option value="PATROCINIOS">Patrocínios</option>
-              </select>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-medium text-slate-500">
+                  Categoria <span className="text-rose-500">*</span>
+                </label>
+                {isAddingNovaCategoria ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddingNovaCategoria(false);
+                      setNovaCategoriaNome('');
+                    }}
+                    className="text-[11px] text-slate-500 hover:text-slate-700 underline cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingNovaCategoria(true)}
+                    className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-0.5 cursor-pointer"
+                  >
+                    <Plus size={12} /> Nova
+                  </button>
+                )}
+              </div>
+
+              {isAddingNovaCategoria ? (
+                <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
+                  <input
+                    type="text"
+                    autoFocus
+                    value={novaCategoriaNome}
+                    onChange={(e) => setNovaCategoriaNome(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const nomeTrim = novaCategoriaNome.trim();
+                        if (nomeTrim) {
+                          const idFormatted = nomeTrim.toUpperCase().replace(/\s+/g, '_');
+                          const exists = categorias.some((c) => c.id === idFormatted || c.nome.toLowerCase() === nomeTrim.toLowerCase());
+                          if (!exists) {
+                            const updated = [...categorias, { id: idFormatted, nome: nomeTrim }];
+                            setCategorias(updated);
+                            try {
+                              localStorage.setItem('portofc_categorias_financeiras', JSON.stringify(updated));
+                            } catch (err) {
+                              console.warn(err);
+                            }
+                          }
+                          setForm({ ...form, categoria: idFormatted });
+                          setIsAddingNovaCategoria(false);
+                          setNovaCategoriaNome('');
+                        }
+                      } else if (e.key === 'Escape') {
+                        setIsAddingNovaCategoria(false);
+                        setNovaCategoriaNome('');
+                      }
+                    }}
+                    placeholder="Nome da nova categoria..."
+                    className="flex-1 px-3 py-2 text-sm bg-white border border-blue-400 rounded-xl focus:ring-2 focus:ring-blue-600/30 text-slate-800"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nomeTrim = novaCategoriaNome.trim();
+                      if (nomeTrim) {
+                        const idFormatted = nomeTrim.toUpperCase().replace(/\s+/g, '_');
+                        const exists = categorias.some((c) => c.id === idFormatted || c.nome.toLowerCase() === nomeTrim.toLowerCase());
+                        if (!exists) {
+                          const updated = [...categorias, { id: idFormatted, nome: nomeTrim }];
+                          setCategorias(updated);
+                          try {
+                            localStorage.setItem('portofc_categorias_financeiras', JSON.stringify(updated));
+                          } catch (err) {
+                            console.warn(err);
+                          }
+                        }
+                        setForm({ ...form, categoria: idFormatted });
+                        setIsAddingNovaCategoria(false);
+                        setNovaCategoriaNome('');
+                      }
+                    }}
+                    className="px-3 py-2 text-xs font-bold rounded-xl bg-blue-700 text-white hover:bg-blue-800 transition-colors cursor-pointer shrink-0"
+                  >
+                    Salvar
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={form.categoria}
+                  onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 text-slate-700 cursor-pointer"
+                >
+                  {categorias.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.nome}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="sm:col-span-2">

@@ -147,6 +147,8 @@ export interface Material {
   quantidadeEstoque: number;
   quantidadeMinima: number;
   localArmazenamento?: string;
+  valorUnitario?: number;
+  valorTotal?: number;
 }
 
 export interface Uniforme {
@@ -156,6 +158,8 @@ export interface Uniforme {
   quantidadeEntregue: number;
   saldoEstoque: number;
   descricao?: string;
+  valorUnitario?: number;
+  valorTotal?: number;
 }
 
 export interface TetoConfig {

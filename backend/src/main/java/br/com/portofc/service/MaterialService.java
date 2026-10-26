@@ -76,6 +76,39 @@ public class MaterialService {
         return toUniformeDTO(salvo);
     }
 
+    @Transactional
+    public void deletarMaterial(Long id) {
+        materialRepository.deleteById(id);
+    }
+
+    @Transactional
+    public UniformeDTO salvarUniforme(UniformeDTO dto) {
+        Uniforme u;
+        if (dto.getId() != null) {
+            u = uniformeRepository.findById(dto.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Uniforme não encontrado ID: " + dto.getId()));
+            u.setTamanho(dto.getTamanho());
+            if (dto.getQuantidadeComprada() != null) u.setQuantidadeComprada(dto.getQuantidadeComprada());
+            if (dto.getQuantidadeEntregue() != null) u.setQuantidadeEntregue(dto.getQuantidadeEntregue());
+            u.setDescricao(dto.getDescricao());
+        } else {
+            u = Uniforme.builder()
+                    .tamanho(dto.getTamanho())
+                    .quantidadeComprada(dto.getQuantidadeComprada() != null ? dto.getQuantidadeComprada() : 0)
+                    .quantidadeEntregue(0)
+                    .saldoEstoque(dto.getQuantidadeComprada() != null ? dto.getQuantidadeComprada() : 0)
+                    .descricao(dto.getDescricao())
+                    .build();
+        }
+        u.calcularSaldo();
+        return toUniformeDTO(uniformeRepository.save(u));
+    }
+
+    @Transactional
+    public void deletarUniforme(Long id) {
+        uniformeRepository.deleteById(id);
+    }
+
     public MaterialDTO toMaterialDTO(Material m) {
         return MaterialDTO.builder()
                 .id(m.getId())

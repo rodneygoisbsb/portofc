@@ -28,9 +28,26 @@ public class MaterialController {
         return ResponseEntity.ok(materialService.salvarMaterial(dto));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletarMaterial(@PathVariable Long id) {
+        materialService.deletarMaterial(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/uniformes")
     public ResponseEntity<List<UniformeDTO>> listarUniformes() {
         return ResponseEntity.ok(materialService.listarUniformes());
+    }
+
+    @PostMapping("/uniformes")
+    public ResponseEntity<UniformeDTO> salvarUniforme(@Valid @RequestBody UniformeDTO dto) {
+        return ResponseEntity.ok(materialService.salvarUniforme(dto));
+    }
+
+    @DeleteMapping("/uniformes/{id}")
+    public ResponseEntity<Void> deletarUniforme(@PathVariable Long id) {
+        materialService.deletarUniforme(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/uniformes/entrega")

@@ -2,7 +2,10 @@ package br.com.portofc.model.enums;
 
 public enum TipoContratacao {
     HORISTA("Horista / Valor por Aula"),
-    MENSALISTA("Mensalista / Salário Fixo");
+    MENSALISTA("Mensalista / Salário Fixo"),
+    CLT("CLT"),
+    PJ("Pessoa Jurídica (PJ)"),
+    VOLUNTARIO("Voluntário");
 
     private final String label;
 

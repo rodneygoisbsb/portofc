@@ -8,9 +8,7 @@ import {
   Shirt,
   FileSpreadsheet,
   ShieldCheck,
-  Database,
 } from 'lucide-react';
-import { USE_MOCKS } from '../../services/api';
 
 export type NavTab =
   | 'dashboard'
@@ -33,7 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
     { id: 'frequencia' as NavTab, label: 'Frequência Diária', icon: CalendarCheck },
     { id: 'equipe' as NavTab, label: 'Equipe', icon: Briefcase },
     { id: 'financeiro' as NavTab, label: 'Financeiro', icon: DollarSign },
-    { id: 'materiais' as NavTab, label: 'Materiais', icon: Shirt },
+    { id: 'materiais' as NavTab, label: 'Recursos', icon: Shirt },
     { id: 'prestacao' as NavTab, label: 'Prestação de Contas', icon: FileSpreadsheet },
   ];
 
@@ -80,20 +78,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
         })}
       </nav>
 
-      {/* Mode & Storage Indicator */}
-      <div className="p-4 border-t border-slate-100 bg-slate-50/60 m-3 rounded-xl border border-slate-100">
-        <div className="flex items-center gap-2 mb-1">
-          <Database size={15} className={USE_MOCKS ? 'text-amber-600' : 'text-emerald-600'} />
-          <span className="text-xs font-semibold text-slate-800">
-            {USE_MOCKS ? 'Modo Demonstração (Mocks)' : 'Conectado ao Back-end'}
-          </span>
-        </div>
-        <p className="text-[11px] text-slate-500 leading-tight">
-          {USE_MOCKS
-            ? 'Dados locais ativos com suporte a fallback imediato.'
-            : 'Sincronizado com a API Spring Boot em tempo real.'}
-        </p>
-      </div>
     </aside>
   );
 };
