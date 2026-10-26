@@ -78,10 +78,10 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       {/* Background Glows */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-lg relative z-10 my-4">
         {/* Main Card */}
@@ -93,7 +93,7 @@ export const LoginPage: React.FC = () => {
               <img src="/logo.png" alt="Logo Oficial PORTO FC" className="w-full h-full object-contain scale-125" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              PORTO <span className="text-emerald-400">FC</span>
+              PORTO <span className="text-blue-500">FC</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
               Plataforma de Gestão Esportiva & Prestação de Contas
@@ -107,7 +107,7 @@ export const LoginPage: React.FC = () => {
               onClick={() => { setMode('login'); setErrorMsg(''); setRegistrationSuccess(null); }}
               className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                 mode === 'login'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                  ? 'bg-blue-700 text-white shadow-md shadow-blue-700/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -119,7 +119,7 @@ export const LoginPage: React.FC = () => {
               onClick={() => { setMode('cadastro'); setErrorMsg(''); setRegistrationSuccess(null); }}
               className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                 mode === 'cadastro'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                  ? 'bg-blue-700 text-white shadow-md shadow-blue-700/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -151,7 +151,7 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="ex: tainara@portofc.org.br"
                     required
-                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
                   />
                 </div>
               </div>
@@ -167,7 +167,7 @@ export const LoginPage: React.FC = () => {
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
                   />
                   <button
                     type="button"
@@ -182,7 +182,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full mt-2 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-700/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -196,16 +196,16 @@ export const LoginPage: React.FC = () => {
             </form>
           ) : registrationSuccess ? (
             /* TELA DE SUCESSO - AGUARDANDO AUTORIZAÇÃO */
-            <div className="text-center py-6 px-4 bg-emerald-950/30 border border-emerald-500/30 rounded-2xl animate-in zoom-in-95 duration-200">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white mx-auto flex items-center justify-center mb-4 ring-8 ring-emerald-500/10 shadow-lg shadow-emerald-500/20">
+            <div className="text-center py-6 px-4 bg-blue-950/30 border border-blue-500/30 rounded-2xl animate-in zoom-in-95 duration-200">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-700 to-blue-500 text-white mx-auto flex items-center justify-center mb-4 ring-8 ring-blue-500/10 shadow-lg shadow-blue-500/20">
                 <ShieldCheck size={36} />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Solicitação de Acesso Registrada!</h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-sm mx-auto mb-4">
-                Seu cadastro foi enviado com sucesso. Por governança e segurança da instituição, novos acessos precisam ser autorizados previamente pela diretoria (<span className="text-emerald-400 font-bold">Tainara</span> e <span className="text-blue-400 font-bold">Nayara</span>).
+                Seu cadastro foi enviado com sucesso. Por governança e segurança da instituição, novos acessos precisam ser autorizados previamente pela diretoria (<span className="text-blue-400 font-bold">Tainara</span> e <span className="text-blue-400 font-bold">Nayara</span>).
               </p>
               <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] text-slate-400 mb-5 text-left flex items-start gap-2.5">
-                <UserCheck size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <UserCheck size={16} className="text-blue-400 shrink-0 mt-0.5" />
                 <span>Assim que sua solicitação for aprovada no painel da diretoria, você poderá fazer o login normalmente com seu e-mail.</span>
               </div>
               <button
@@ -215,7 +215,7 @@ export const LoginPage: React.FC = () => {
                   setMode('login');
                   setErrorMsg('');
                 }}
-                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg transition-all cursor-pointer"
+                className="w-full bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg transition-all cursor-pointer"
               >
                 Voltar para o Login
               </button>
@@ -235,7 +235,7 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => setNome(e.target.value)}
                     placeholder="Seu nome completo"
                     required
-                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
                   />
                 </div>
               </div>
@@ -252,7 +252,7 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="seu.email@portofc.org.br"
                     required
-                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
                   />
                 </div>
               </div>
@@ -266,7 +266,7 @@ export const LoginPage: React.FC = () => {
                   <select
                     value={cargo}
                     onChange={(e) => setCargo(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all cursor-pointer"
+                    className="w-full bg-slate-800 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all cursor-pointer"
                   >
                     <option value="Professor(a) de Futebol (Sub-7 a Sub-9)">Professor(a) de Futebol (Sub-7 a Sub-9)</option>
                     <option value="Professor(a) Técnico(a) Principal (Sub-15 a Adulto)">Professor(a) Técnico(a) Principal (Sub-15 a Adulto)</option>
@@ -291,7 +291,7 @@ export const LoginPage: React.FC = () => {
                       onChange={(e) => setSenha(e.target.value)}
                       placeholder="Mín. 6 dígitos"
                       required
-                      className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                      className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
                     />
                   </div>
                 </div>
@@ -308,7 +308,7 @@ export const LoginPage: React.FC = () => {
                       onChange={(e) => setConfirmarSenha(e.target.value)}
                       placeholder="Repita a senha"
                       required
-                      className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                      className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
                     />
                   </div>
                 </div>
@@ -317,7 +317,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full mt-2 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-700/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -373,7 +373,7 @@ export const LoginPage: React.FC = () => {
 
           {/* Security Badge */}
           <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
-            <ShieldCheck size={14} className="text-emerald-500" />
+            <ShieldCheck size={14} className="text-blue-500" />
             <span>Autenticação institucional protegida para diretoria e colaboradores</span>
           </div>
 
