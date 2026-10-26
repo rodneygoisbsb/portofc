@@ -77,18 +77,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleQuickLogin = async (userEmail: string) => {
-    setErrorMsg('');
-    setIsLoading(true);
-    try {
-      await login(userEmail, '123456');
-    } catch {
-      setErrorMsg('Falha no acesso rápido.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       {/* Background Glows */}
@@ -383,52 +371,10 @@ export const LoginPage: React.FC = () => {
             </span>
           </button>
 
-          {/* Quick Demo Access Roles */}
-          <div className="mt-6 pt-5 border-t border-slate-800/80">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-2.5 flex items-center justify-center gap-1.5">
-              <UserCheck size={14} className="text-emerald-400" />
-              <span>Acesso Rápido para a Equipe:</span>
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-left">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('tainara@portofc.org.br')}
-                className="p-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 hover:border-emerald-500/50 transition-all cursor-pointer"
-              >
-                <p className="text-xs font-bold text-white leading-tight">Tainara</p>
-                <p className="text-[10px] text-emerald-400 mt-0.5 truncate">Gestora Financeira</p>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('nayara@portofc.org.br')}
-                className="p-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 hover:border-emerald-500/50 transition-all cursor-pointer"
-              >
-                <p className="text-xs font-bold text-white leading-tight">Nayara</p>
-                <p className="text-[10px] text-blue-400 mt-0.5 truncate">Gerente Geral</p>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('ricardo.mendonca@portofc.org.br')}
-                className="p-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 hover:border-amber-500/50 transition-all cursor-pointer"
-              >
-                <p className="text-xs font-bold text-white leading-tight">Prof. Ricardo</p>
-                <p className="text-[10px] text-amber-400 mt-0.5 truncate">Sub-7 e Sub-9</p>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('marcelo.vasconcelos@portofc.org.br')}
-                className="p-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 hover:border-purple-500/50 transition-all cursor-pointer"
-              >
-                <p className="text-xs font-bold text-white leading-tight">Prof. Marcelo</p>
-                <p className="text-[10px] text-purple-400 mt-0.5 truncate">Sub-15 a Adulto</p>
-              </button>
-            </div>
-          </div>
-
           {/* Security Badge */}
-          <div className="mt-5 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
+          <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
             <ShieldCheck size={14} className="text-emerald-500" />
-            <span>Autenticação protegida via Backend Spring Boot & PostgreSQL</span>
+            <span>Autenticação institucional protegida para diretoria e colaboradores</span>
           </div>
 
         </div>

@@ -10,6 +10,7 @@ import { EquipeModule } from './components/modules/equipe/EquipeModule';
 import { FinanceiroModule } from './components/modules/financeiro/FinanceiroModule';
 import { MateriaisModule } from './components/modules/materiais/MateriaisModule';
 import { PrestacaoContasModule } from './components/modules/prestacao/PrestacaoContasModule';
+import { PerfilModule } from './components/modules/perfil/PerfilModule';
 
 function MainApp() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -49,6 +50,7 @@ function MainApp() {
       {currentTab === 'financeiro' && <FinanceiroModule />}
       {currentTab === 'materiais' && <MateriaisModule />}
       {currentTab === 'prestacao' && <PrestacaoContasModule />}
+      {currentTab === 'perfil' && <PerfilModule />}
     </Layout>
   );
 }

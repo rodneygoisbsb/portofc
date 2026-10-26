@@ -4,9 +4,10 @@ import { useAuth } from '../../context/AuthContext';
 
 interface TopbarProps {
   onSearch?: (term: string) => void;
+  onSelectProfile?: () => void;
 }
 
-export const Topbar: React.FC<TopbarProps> = ({ onSearch }) => {
+export const Topbar: React.FC<TopbarProps> = ({ onSearch, onSelectProfile }) => {
   const { user, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -80,21 +81,30 @@ export const Topbar: React.FC<TopbarProps> = ({ onSearch }) => {
 
         {/* Authenticated User Profile */}
         <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
-          {user?.fotoUrl ? (
-            <img
-              src={user.fotoUrl}
-              alt={user.nome}
-              className="w-10 h-10 rounded-xl object-cover shadow-sm ring-2 ring-slate-100"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-              {user?.nome ? user.nome.substring(0, 2).toUpperCase() : 'FC'}
+          <button
+            type="button"
+            onClick={onSelectProfile}
+            className="flex items-center gap-3 text-left hover:opacity-85 transition-opacity cursor-pointer group"
+            title="Clique para editar seu perfil e senha"
+          >
+            {user?.fotoUrl ? (
+              <img
+                src={user.fotoUrl}
+                alt={user.nome}
+                className="w-10 h-10 rounded-xl object-cover shadow-sm ring-2 ring-slate-100 group-hover:ring-blue-400 transition-all"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                {user?.nome ? user.nome.substring(0, 2).toUpperCase() : 'FC'}
+              </div>
+            )}
+            <div className="hidden sm:block">
+              <p className="text-sm font-semibold text-slate-800 leading-none group-hover:text-blue-700 transition-colors">
+                {user?.nome || 'Usuário'}
+              </p>
+              <p className="text-xs text-slate-400 mt-1 truncate max-w-[160px]">{user?.cargo || 'PORTO FC'}</p>
             </div>
-          )}
-          <div className="hidden sm:block">
-            <p className="text-sm font-semibold text-slate-800 leading-none">{user?.nome || 'Usuário'}</p>
-            <p className="text-xs text-slate-400 mt-1 truncate max-w-[160px]">{user?.cargo || 'PORTO FC'}</p>
-          </div>
+          </button>
           <button
             title="Sair do Sistema"
             className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors ml-1 cursor-pointer"

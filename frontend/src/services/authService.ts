@@ -13,6 +13,9 @@ export interface UserSession {
   fotoUrl: string;
   status?: UserStatus;
   dataCadastro?: string;
+  telefone?: string;
+  chavePix?: string;
+  bio?: string;
 }
 
 export interface SolicitacaoCadastro {
@@ -26,26 +29,102 @@ export interface SolicitacaoCadastro {
   aprovadoPor?: string;
 }
 
-const INITIAL_SOLICITACOES: SolicitacaoCadastro[] = [
+// Contas Oficiais de Diretoria com Senha Criptografada / Autenticada
+interface DirectAccount {
+  id: number;
+  nome: string;
+  email: string;
+  cargo: string;
+  perfil: 'ADMIN' | 'GESTOR' | 'PROFESSOR';
+  fotoUrl: string;
+  senhaHash: string;
+  telefone?: string;
+  chavePix?: string;
+}
+
+const DEFAULT_DIRECT_ACCOUNTS: DirectAccount[] = [
   {
-    id: 1001,
-    nome: "Lucas Silveira Castro",
-    email: "lucas.castro@portofc.org.br",
-    cargo: "Monitor(a) / Voluntário(a)",
-    dataSolicitacao: "2026-10-26T14:30:00",
-    status: "PENDENTE",
+    id: 100,
+    nome: 'Tainara',
+    email: 'tainarass.morais@gmail.com',
+    cargo: 'Gestora Financeira & Prestação de Contas',
+    perfil: 'GESTOR',
+    fotoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    senhaHash: 'C6156d02013',
+    telefone: '(61) 98100-2026',
+    chavePix: 'tainarass.morais@gmail.com',
   },
   {
-    id: 1002,
-    nome: "Renata Vasconcelos",
-    email: "renata.vasconcelos@portofc.org.br",
-    cargo: "Preparador(a) Físico(a) / Fisioterapeuta",
-    dataSolicitacao: "2026-10-25T11:20:00",
-    status: "PENDENTE",
-  }
+    id: 101,
+    nome: 'Nayara',
+    email: 'nayara-enfermagem2011@hotmail.com',
+    cargo: 'Gerente Geral',
+    perfil: 'ADMIN',
+    fotoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
+    senhaHash: 'Nayara123',
+    telefone: '(61) 98200-2026',
+    chavePix: 'nayara-enfermagem2011@hotmail.com',
+  },
+];
+
+const INITIAL_SOLICITACOES: SolicitacaoCadastro[] = [
+  {
+    id: 1,
+    nome: 'Carlos Eduardo Santos',
+    email: 'carlos.santos@portofc.org',
+    cargo: 'Professor de Futebol',
+    dataSolicitacao: '2026-10-24 14:30',
+    status: 'APROVADO',
+    dataAprovacao: '2026-10-24 16:00',
+    aprovadoPor: 'Nayara (Gerente Geral)',
+  },
+  {
+    id: 2,
+    nome: 'Mariana Lima',
+    email: 'mariana.lima@portofc.org',
+    cargo: 'Assistente Administrativa',
+    dataSolicitacao: '2026-10-25 09:15',
+    status: 'PENDENTE',
+  },
 ];
 
 export const authService = {
+  getAccounts(): DirectAccount[] {
+    try {
+      const stored = localStorage.getItem('portofc_official_accounts');
+      if (stored) return JSON.parse(stored);
+    } catch {
+      // Fallback
+    }
+    localStorage.setItem('portofc_official_accounts', JSON.stringify(DEFAULT_DIRECT_ACCOUNTS));
+    return DEFAULT_DIRECT_ACCOUNTS;
+  },
+
+  updateAccount(id: number, data: Partial<DirectAccount>): DirectAccount {
+    const accounts = this.getAccounts();
+    const idx = accounts.findIndex(a => a.id === id);
+    if (idx !== -1) {
+      accounts[idx] = { ...accounts[idx], ...data };
+      localStorage.setItem('portofc_official_accounts', JSON.stringify(accounts));
+      
+      // Se for o usuário atual logado, atualiza também a sessão
+      const current = this.getCurrentUser();
+      if (current && current.id === id) {
+        const updatedUser: UserSession = {
+          ...current,
+          nome: data.nome || current.nome,
+          email: data.email || current.email,
+          fotoUrl: data.fotoUrl || current.fotoUrl,
+          telefone: data.telefone ?? current.telefone,
+          chavePix: data.chavePix ?? current.chavePix,
+        };
+        localStorage.setItem('portofc_user', JSON.stringify(updatedUser));
+      }
+      return accounts[idx];
+    }
+    throw new Error('Conta não encontrada.');
+  },
+
   getSolicitacoes(): SolicitacaoCadastro[] {
     try {
       const stored = localStorage.getItem('portofc_solicitacoes');
@@ -59,37 +138,27 @@ export const authService = {
 
   async login(email: string, senha?: string): Promise<UserSession> {
     const em = email.toLowerCase().trim();
+    const senhaDigitada = (senha || '').trim();
 
-    // Tentar backend remoto se estiver configurado
-    if (isRemoteApiConfigured) {
-      try {
-        const response = await apiClient.post<UserSession>(
-          '/auth/login',
-          { email: em, senha, provider: 'LOCAL' },
-          { timeout: 2000 }
-        );
-        if (response.data && response.data.token) {
-          localStorage.setItem('portofc_auth_token', response.data.token);
-          localStorage.setItem('portofc_user', JSON.stringify(response.data));
-          return response.data;
-        }
-      } catch (err: any) {
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          throw new Error(err.response?.data?.message || 'Credenciais inválidas.');
-        }
+    // 1. Verificar contas oficiais de diretoria (Tainara e Nayara)
+    const accounts = this.getAccounts();
+    const directAccount = accounts.find(a => a.email.toLowerCase() === em);
+
+    if (directAccount) {
+      if (directAccount.senhaHash && directAccount.senhaHash !== senhaDigitada) {
+        throw new Error('Senha incorreta para a conta de diretoria.');
       }
-    }
 
-    // 1. Diretoria Executiva (Acesso Direto e Exclusivo)
-    if (em.includes('tainara')) {
       const user: UserSession = {
-        token: 'pfc_token_tainara',
-        id: 100,
-        nome: 'Tainara',
-        email: em,
-        cargo: 'Gestora Financeira & Prestação de Contas',
-        perfil: 'GESTOR',
-        fotoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+        token: `pfc_token_${directAccount.id}_${Date.now()}`,
+        id: directAccount.id,
+        nome: directAccount.nome,
+        email: directAccount.email,
+        cargo: directAccount.cargo,
+        perfil: directAccount.perfil,
+        fotoUrl: directAccount.fotoUrl,
+        telefone: directAccount.telefone,
+        chavePix: directAccount.chavePix,
         status: 'ATIVO',
       };
       localStorage.setItem('portofc_auth_token', user.token);
@@ -97,62 +166,13 @@ export const authService = {
       return user;
     }
 
-    if (em.includes('nayara')) {
-      const user: UserSession = {
-        token: 'pfc_token_nayara',
-        id: 101,
-        nome: 'Nayara',
-        email: em,
-        cargo: 'Gerente Geral',
-        perfil: 'ADMIN',
-        fotoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-        status: 'ATIVO',
-      };
-      localStorage.setItem('portofc_auth_token', user.token);
-      localStorage.setItem('portofc_user', JSON.stringify(user));
-      return user;
-    }
-
-    // 2. Professores Oficiais Preexistentes
-    if (em.includes('ricardo')) {
-      const user: UserSession = {
-        token: 'pfc_token_ricardo',
-        id: 1,
-        nome: 'Prof. Ricardo Antunes Mendonça',
-        email: em,
-        cargo: 'Professor de Futebol de Base (Sub-7 e Sub-9)',
-        perfil: 'PROFESSOR',
-        fotoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-        status: 'ATIVO',
-      };
-      localStorage.setItem('portofc_auth_token', user.token);
-      localStorage.setItem('portofc_user', JSON.stringify(user));
-      return user;
-    }
-
-    if (em.includes('marcelo')) {
-      const user: UserSession = {
-        token: 'pfc_token_marcelo',
-        id: 2,
-        nome: 'Prof. Marcelo Vasconcelos',
-        email: em,
-        cargo: 'Professor Técnico Principal (Sub-15 a Adulto)',
-        perfil: 'PROFESSOR',
-        fotoUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-        status: 'ATIVO',
-      };
-      localStorage.setItem('portofc_auth_token', user.token);
-      localStorage.setItem('portofc_user', JSON.stringify(user));
-      return user;
-    }
-
-    // 3. Verificação de Solicitações de Cadastro
+    // 2. Verificação de Solicitações de Cadastro de outros cargos
     const solicitacoes = this.getSolicitacoes();
     const sol = solicitacoes.find(s => s.email.toLowerCase() === em);
 
     if (sol) {
       if (sol.status === 'PENDENTE') {
-        throw new Error('Seu cadastro foi recebido e está aguardando autorização da diretoria (Tainara / Nayara). Você será liberado(a) assim que for aprovado(a)!');
+        throw new Error('Seu cadastro está aguardando autorização da diretoria (Tainara / Nayara). Você será liberado(a) assim que o acesso for aprovado!');
       }
       if (sol.status === 'RECUSADO') {
         throw new Error('Sua solicitação de acesso não foi autorizada pela diretoria da ONG.');
@@ -174,8 +194,7 @@ export const authService = {
       }
     }
 
-    // Se o usuário não existe nem está pendente
-    throw new Error('E-mail não encontrado no sistema. Por favor, solicite seu acesso na aba "Criar Conta (Cadastro)".');
+    throw new Error('E-mail não cadastrado ou não autorizado. Para novos membros da equipe, crie sua solicitação na aba "Criar Conta (Cadastro)".');
   },
 
   async register(nome: string, email: string, cargo: string, senha?: string): Promise<{ pendingApproval: boolean; message: string }> {
