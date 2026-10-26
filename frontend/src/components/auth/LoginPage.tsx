@@ -69,7 +69,7 @@ export const LoginPage: React.FC = () => {
     setErrorMsg('');
     setIsLoading(true);
     try {
-      await loginGoogle(undefined, email || 'tainara@portofc.org.br');
+      await loginGoogle(undefined, email || 'portofc@gmail.com');
     } catch {
       setErrorMsg('Falha ao autenticar com o Google.');
     } finally {
@@ -78,57 +78,57 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-3 sm:p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       {/* Background Glows */}
       <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md relative z-10">
+      <div className="w-full max-w-lg relative z-10 my-6">
         {/* Main Card */}
-        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-2xl shadow-black/50">
+        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/50">
 
           {/* Header & Logo */}
-          <div className="text-center mb-3">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white p-1.5 shadow-lg shadow-black/30 mb-2 ring-4 ring-slate-800/80 overflow-hidden">
+          <div className="text-center mb-5">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-white p-2 shadow-lg shadow-black/30 mb-3 ring-4 ring-slate-800/80 overflow-hidden">
               <img src="/logo.png" alt="Logo Oficial PORTO FC" className="w-full h-full object-contain scale-125" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               PORTO <span className="text-blue-500">FC</span>
             </h1>
-            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-medium">
+            <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
               Plataforma de Gestão Esportiva & Prestação de Contas
             </p>
           </div>
 
           {/* Tab Selector: Entrar vs Cadastrar */}
-          <div className="grid grid-cols-2 gap-1 p-1 bg-slate-800/70 rounded-xl border border-slate-700/60 mb-3.5">
+          <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-800/70 rounded-2xl border border-slate-700/60 mb-5">
             <button
               type="button"
               onClick={() => { setMode('login'); setErrorMsg(''); setRegistrationSuccess(null); }}
-              className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${mode === 'login'
-                  ? 'bg-blue-700 text-white shadow-md shadow-blue-700/30'
-                  : 'text-slate-400 hover:text-white'
+              className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${mode === 'login'
+                ? 'bg-blue-700 text-white shadow-md shadow-blue-700/30'
+                : 'text-slate-400 hover:text-white'
                 }`}
             >
-              <UserCheck size={14} />
+              <UserCheck size={16} />
               <span>Já tenho conta (Entrar)</span>
             </button>
             <button
               type="button"
               onClick={() => { setMode('cadastro'); setErrorMsg(''); setRegistrationSuccess(null); }}
-              className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${mode === 'cadastro'
-                  ? 'bg-blue-700 text-white shadow-md shadow-blue-700/30'
-                  : 'text-slate-400 hover:text-white'
+              className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${mode === 'cadastro'
+                ? 'bg-blue-700 text-white shadow-md shadow-blue-700/30'
+                : 'text-slate-400 hover:text-white'
                 }`}
             >
-              <UserPlus size={14} />
+              <UserPlus size={16} />
               <span>Criar Conta (Cadastro)</span>
             </button>
           </div>
 
           {/* Error Alert */}
           {errorMsg && (
-            <div className="mb-3 p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-2 text-rose-400 text-xs animate-in fade-in duration-200">
+            <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-2.5 text-rose-400 text-xs sm:text-sm animate-in fade-in duration-200">
               <AlertCircle size={16} className="shrink-0" />
               <span>{errorMsg}</span>
             </div>
@@ -136,10 +136,10 @@ export const LoginPage: React.FC = () => {
 
           {/* FORMULÁRIO DE LOGIN */}
           {mode === 'login' ? (
-            <form onSubmit={handleLoginSubmit} className="space-y-3">
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                  E-mail Institucional
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Email
                 </label>
                 <div className="relative">
                   <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -147,15 +147,15 @@ export const LoginPage: React.FC = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="ex: tainara@portofc.org.br"
+                    placeholder="contato@porto.org.br"
                     required
-                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Senha
                 </label>
                 <div className="relative">
@@ -165,7 +165,7 @@ export const LoginPage: React.FC = () => {
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-11 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
+                    className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
                   />
                   <button
                     type="button"
@@ -180,7 +180,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-1 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-blue-700/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 text-sm"
+                className="w-full mt-2 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-700/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 text-sm"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -222,7 +222,7 @@ export const LoginPage: React.FC = () => {
             /* FORMULÁRIO DE CADASTRO */
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Nome Completo
                 </label>
                 <div className="relative">
@@ -239,8 +239,8 @@ export const LoginPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  E-mail
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Email
                 </label>
                 <div className="relative">
                   <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -248,7 +248,7 @@ export const LoginPage: React.FC = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="seu.email@portofc.org.br"
+                    placeholder="contato@porto.org.br"
                     required
                     className="w-full bg-slate-800/60 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40 focus:border-blue-600 transition-all"
                   />
@@ -256,7 +256,7 @@ export const LoginPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Cargo / Função
                 </label>
                 <div className="relative">
@@ -278,7 +278,7 @@ export const LoginPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                     Senha
                   </label>
                   <div className="relative">
@@ -295,8 +295,8 @@ export const LoginPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Confirmar
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    Confirmar Senha
                   </label>
                   <div className="relative">
                     <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
