@@ -1,0 +1,5 @@
+Nome Completo,CPF,Email,Telefone,Funcao,Tipo Contratacao,Salario Fixo,Valor Hora,Beneficios,Data Admissao,Chave Pix
+Prof. Ricardo Oliveira,456.789.012-34,ricardo.porto@ong.org.br,(61) 98765-4321,Professor Titular,CLT,4500.00,0.00,450.00,2026-01-10,ricardo.porto@ong.org.br
+Prof. Marcos Vinicius,567.890.123-45,marcos.porto@ong.org.br,(61) 99876-5432,Professor Adjunto,HORISTA,0.00,50.00,220.00,2026-02-01,61998765432
+Mariana Souza,789.012.345-67,mariana.porto@ong.org.br,(61) 98123-4567,Coordenadora Pedagogica,CLT,4800.00,0.00,500.00,2026-01-05,mariana.porto@ong.org.br
+Thiago Martins,890.123.456-78,thiago.porto@ong.org.br,(61) 99234-5678,Preparador Fisico,HORISTA,0.00,45.00,200.00,2026-02-15,thiago.porto@ong.org.br
