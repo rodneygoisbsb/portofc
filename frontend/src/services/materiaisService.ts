@@ -1,16 +1,18 @@
-import { apiClient } from './api';
+import { apiClient, isRemoteApiConfigured } from './api';
 import { Material, Uniforme } from '../types';
 import { fallbackStorage } from './storageFallback';
 
 export const materiaisService = {
   async listarMateriais(): Promise<Material[]> {
-    try {
-      const response = await apiClient.get<Material[]>('/materiais');
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        return response.data;
+    if (isRemoteApiConfigured) {
+      try {
+        const response = await apiClient.get<Material[]>('/materiais');
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fallback
       }
-    } catch {
-      // Local fallback
     }
     return fallbackStorage.getMateriais();
   },
@@ -35,13 +37,15 @@ export const materiaisService = {
   },
 
   async listarUniformes(): Promise<Uniforme[]> {
-    try {
-      const response = await apiClient.get<Uniforme[]>('/materiais/uniformes');
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        return response.data;
+    if (isRemoteApiConfigured) {
+      try {
+        const response = await apiClient.get<Uniforme[]>('/materiais/uniformes');
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fallback
       }
-    } catch {
-      // Local fallback
     }
     return fallbackStorage.getUniformes();
   },

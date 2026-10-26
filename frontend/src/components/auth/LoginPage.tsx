@@ -13,11 +13,12 @@ export const LoginPage: React.FC = () => {
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [nome, setNome] = useState('');
-  const [cargo, setCargo] = useState('Gestora Financeira & Prestação de Contas');
+  const [cargo, setCargo] = useState('Professor(a) de Futebol (Sub-7 a Sub-9)');
   
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [registrationSuccess, setRegistrationSuccess] = useState<string | null>(null);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +31,7 @@ export const LoginPage: React.FC = () => {
     try {
       await login(email, senha);
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || 'Falha ao autenticar. Verifique seus dados.');
+      setErrorMsg(err.message || err.response?.data?.message || 'Falha ao autenticar. Verifique seus dados.');
     } finally {
       setIsLoading(false);
     }
@@ -53,9 +54,12 @@ export const LoginPage: React.FC = () => {
     setErrorMsg('');
     setIsLoading(true);
     try {
-      await register(nome, email, cargo, senha);
+      const res = await register(nome, email, cargo, senha);
+      if (res && res.pendingApproval) {
+        setRegistrationSuccess(res.message);
+      }
     } catch (err: any) {
-      setErrorMsg('Não foi possível concluir o cadastro.');
+      setErrorMsg(err.message || 'Não foi possível concluir o cadastro.');
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +116,7 @@ export const LoginPage: React.FC = () => {
           <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-800/70 rounded-2xl border border-slate-700/60 mb-6">
             <button
               type="button"
-              onClick={() => { setMode('login'); setErrorMsg(''); }}
+              onClick={() => { setMode('login'); setErrorMsg(''); setRegistrationSuccess(null); }}
               className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                 mode === 'login'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
@@ -124,7 +128,7 @@ export const LoginPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => { setMode('cadastro'); setErrorMsg(''); }}
+              onClick={() => { setMode('cadastro'); setErrorMsg(''); setRegistrationSuccess(null); }}
               className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                 mode === 'cadastro'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
@@ -202,6 +206,32 @@ export const LoginPage: React.FC = () => {
                 )}
               </button>
             </form>
+          ) : registrationSuccess ? (
+            /* TELA DE SUCESSO - AGUARDANDO AUTORIZAÇÃO */
+            <div className="text-center py-6 px-4 bg-emerald-950/30 border border-emerald-500/30 rounded-2xl animate-in zoom-in-95 duration-200">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white mx-auto flex items-center justify-center mb-4 ring-8 ring-emerald-500/10 shadow-lg shadow-emerald-500/20">
+                <ShieldCheck size={36} />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Solicitação de Acesso Registrada!</h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-sm mx-auto mb-4">
+                Seu cadastro foi enviado com sucesso. Por governança e segurança da instituição, novos acessos precisam ser autorizados previamente pela diretoria (<span className="text-emerald-400 font-bold">Tainara</span> e <span className="text-blue-400 font-bold">Nayara</span>).
+              </p>
+              <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] text-slate-400 mb-5 text-left flex items-start gap-2.5">
+                <UserCheck size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <span>Assim que sua solicitação for aprovada no painel da diretoria, você poderá fazer o login normalmente com seu e-mail.</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setRegistrationSuccess(null);
+                  setMode('login');
+                  setErrorMsg('');
+                }}
+                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg transition-all cursor-pointer"
+              >
+                Voltar para o Login
+              </button>
+            </div>
           ) : (
             /* FORMULÁRIO DE CADASTRO */
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
@@ -250,12 +280,12 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => setCargo(e.target.value)}
                     className="w-full bg-slate-800 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all cursor-pointer"
                   >
-                    <option value="Gestora Financeira & Prestação de Contas">Gestora Financeira & Prestação de Contas</option>
-                    <option value="Gerente Geral">Gerente Geral</option>
-                    <option value="Professor de Futebol (Sub-7 a Sub-9)">Professor de Futebol (Sub-7 a Sub-9)</option>
-                    <option value="Professor Técnico Principal (Sub-15 a Adulto)">Professor Técnico Principal (Sub-15 a Adulto)</option>
-                    <option value="Coordenador Pedagógico e Esportivo">Coordenador Pedagógico e Esportivo</option>
+                    <option value="Professor(a) de Futebol (Sub-7 a Sub-9)">Professor(a) de Futebol (Sub-7 a Sub-9)</option>
+                    <option value="Professor(a) Técnico(a) Principal (Sub-15 a Adulto)">Professor(a) Técnico(a) Principal (Sub-15 a Adulto)</option>
+                    <option value="Coordenador(a) Pedagógico(a) e Esportivo(a)">Coordenador(a) Pedagógico(a) e Esportivo(a)</option>
                     <option value="Assistente Administrativo(a)">Assistente Administrativo(a)</option>
+                    <option value="Preparador(a) Físico(a) / Fisioterapeuta">Preparador(a) Físico(a) / Fisioterapeuta</option>
+                    <option value="Monitor(a) / Voluntário(a)">Monitor(a) / Voluntário(a)</option>
                   </select>
                 </div>
               </div>

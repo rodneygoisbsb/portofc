@@ -1,18 +1,20 @@
-import { apiClient } from './api';
+import { apiClient, isRemoteApiConfigured } from './api';
 import { Aluno, CategoriaAluno } from '../types';
 import { fallbackStorage } from './storageFallback';
 
 export const alunosService = {
   async listar(categoria?: CategoriaAluno, busca?: string): Promise<Aluno[]> {
-    try {
-      const response = await apiClient.get<Aluno[]>('/alunos', {
-        params: { categoria, busca },
-      });
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        return response.data;
+    if (isRemoteApiConfigured) {
+      try {
+        const response = await apiClient.get<Aluno[]>('/alunos', {
+          params: { categoria, busca },
+        });
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fallback
       }
-    } catch {
-      // Backend inacessível, usar armazenamento local
     }
     let list = fallbackStorage.getAlunos();
     if (categoria && categoria !== ('TODAS' as any)) {

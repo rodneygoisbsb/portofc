@@ -6,7 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, senha?: string) => Promise<UserSession>;
-  register: (nome: string, email: string, cargo: string, senha?: string) => Promise<UserSession>;
+  register: (nome: string, email: string, cargo: string, senha?: string) => Promise<{ pendingApproval: boolean; message: string }>;
   loginGoogle: (googleCredential?: string, email?: string) => Promise<UserSession>;
   logout: () => void;
 }
@@ -36,10 +36,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return session;
   };
 
-  const register = async (nome: string, email: string, cargo: string, senha?: string): Promise<UserSession> => {
-    const session = await authService.register(nome, email, cargo, senha);
-    setUser(session);
-    return session;
+  const register = async (nome: string, email: string, cargo: string, senha?: string): Promise<{ pendingApproval: boolean; message: string }> => {
+    return await authService.register(nome, email, cargo, senha);
   };
 
   const loginGoogle = async (googleCredential?: string, email?: string): Promise<UserSession> => {

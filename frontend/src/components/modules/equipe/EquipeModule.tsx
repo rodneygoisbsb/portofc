@@ -33,6 +33,8 @@ import {
   FileText,
   CreditCard,
   ArrowUpRight,
+  UserCheck,
+  ShieldCheck,
 } from 'lucide-react';
 import { Card } from '../../ui/Card';
 import { Badge } from '../../ui/Badge';
@@ -40,6 +42,8 @@ import { Button } from '../../ui/Button';
 import { Modal } from '../../ui/Modal';
 import { equipeService } from '../../../services/equipeService';
 import { financeiroService } from '../../../services/financeiroService';
+import { authService, SolicitacaoCadastro } from '../../../services/authService';
+import { useAuth } from '../../../context/AuthContext';
 import { Colaborador, FolhaAula, FormaPagamento, StatusFolha, TipoContratacao, TetoConfig } from '../../../types';
 
 interface ColaboradorFormData {
@@ -87,10 +91,34 @@ interface FolhaEditFormData {
 }
 
 export const EquipeModule: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'colaboradores' | 'folha'>('folha');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'colaboradores' | 'folha' | 'solicitacoes'>('folha');
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [folhas, setFolhas] = useState<FolhaAula[]>([]);
   const [loading, setLoading] = useState(true);
+  const [solicitacoes, setSolicitacoes] = useState<SolicitacaoCadastro[]>(() => authService.getSolicitacoes());
+
+  const solicitacoesPendentes = useMemo(() => {
+    return solicitacoes.filter((s) => s.status === 'PENDENTE');
+  }, [solicitacoes]);
+
+  const handleAprovarSolicitacao = (id: number, nome: string) => {
+    try {
+      authService.aprovarSolicitacao(id, user?.nome || 'Tainara');
+      setSolicitacoes(authService.getSolicitacoes());
+      loadData();
+      alert(`Acesso autorizado para "${nome}" com sucesso! Agora o colaborador já pode acessar a plataforma.`);
+    } catch (e: any) {
+      alert(e.message || 'Erro ao aprovar solicitação.');
+    }
+  };
+
+  const handleRecusarSolicitacao = (id: number, nome: string) => {
+    if (confirm(`Deseja realmente recusar a solicitação de acesso de "${nome}"?`)) {
+      authService.recusarSolicitacao(id);
+      setSolicitacoes(authService.getSolicitacoes());
+    }
+  };
 
   // Filtro de Mês de Referência da Folha (Único filtro em Equipe)
   const [selectedMes, setSelectedMes] = useState('2026-10');
@@ -746,10 +774,10 @@ export const EquipeModule: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-px">
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-px overflow-x-auto">
         <button
           onClick={() => setActiveTab('folha')}
-          className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 ${activeTab === 'folha'
+          className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'folha'
             ? 'border-blue-700 text-blue-700'
             : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
@@ -759,13 +787,35 @@ export const EquipeModule: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab('colaboradores')}
-          className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 ${activeTab === 'colaboradores'
+          className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'colaboradores'
             ? 'border-blue-700 text-blue-700'
             : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
         >
           <Briefcase size={17} />
-          Colaboradores
+          <span>Colaboradores</span>
+          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
+            {colaboradores.length}
+          </span>
+        </button>
+        <button
+          onClick={() => setActiveTab('solicitacoes')}
+          className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'solicitacoes'
+            ? 'border-blue-700 text-blue-700'
+            : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+        >
+          <UserCheck size={17} />
+          <span>Aprovações de Cadastro</span>
+          {solicitacoesPendentes.length > 0 ? (
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-bold animate-pulse">
+              {solicitacoesPendentes.length} {solicitacoesPendentes.length === 1 ? 'pendente' : 'pendentes'}
+            </span>
+          ) : (
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">
+              0
+            </span>
+          )}
         </button>
       </div>
 
@@ -1157,7 +1207,7 @@ export const EquipeModule: React.FC = () => {
             </div>
           </Card>
         </div>
-      ) : (
+      ) : activeTab === 'colaboradores' ? (
         /* Aba Corpo Docente & Administrativo */
         <div className="space-y-4">
           {/* Barra de Filtro e Busca */}
@@ -1322,6 +1372,148 @@ export const EquipeModule: React.FC = () => {
                   </Card>
                 );
               })}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Aba de Aprovações de Cadastro */
+        <div className="space-y-6">
+          {/* Banner Informativo */}
+          <div className="bg-gradient-to-r from-blue-900 to-indigo-950 rounded-2xl p-5 text-white shadow-md border border-blue-800/60">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 ring-4 ring-blue-500/10">
+                  <ShieldCheck size={28} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white tracking-tight">Controle de Acessos & Autorização de Cadastros</h3>
+                  <p className="text-xs text-blue-200/90 mt-0.5 max-w-xl leading-relaxed">
+                    Painel exclusivo de autorização da diretoria (<strong>Tainara</strong> & <strong>Nayara</strong>). Novos colaboradores que solicitam cadastro no site ficam retidos até receberem sua autorização oficial.
+                  </p>
+                </div>
+              </div>
+              <div className="px-3 py-1.5 rounded-xl bg-blue-800/50 border border-blue-700/60 text-xs font-semibold text-blue-200 shrink-0 self-start sm:self-auto">
+                {solicitacoesPendentes.length} {solicitacoesPendentes.length === 1 ? 'pendência aguardando' : 'pendências aguardando'}
+              </div>
+            </div>
+          </div>
+
+          {/* Lista de Solicitações Pendentes */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <Clock size={16} className="text-amber-500" />
+              <span>Solicitações Pendentes de Avaliação</span>
+            </h4>
+
+            {solicitacoesPendentes.length === 0 ? (
+              <Card className="text-center py-12 bg-white/70">
+                <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-3 ring-8 ring-emerald-50/50">
+                  <CheckCircle2 size={32} />
+                </div>
+                <h4 className="text-base font-bold text-slate-800">Tudo em dia!</h4>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                  Não há novas solicitações de cadastro pendentes. Todos os colaboradores estão devidamente autorizados.
+                </p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {solicitacoesPendentes.map((sol) => (
+                  <Card key={sol.id} className="p-5 border-amber-200/70 bg-gradient-to-br from-white to-amber-50/20 shadow-xs hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-slate-900 text-white font-black text-lg flex items-center justify-center shadow-xs">
+                          {sol.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-900 text-sm">{sol.nome}</h4>
+                          <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
+                            <Mail size={13} className="text-slate-400" />
+                            <span>{sol.email}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="warning">Aguardando</Badge>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="text-slate-400 font-medium block text-[10px] uppercase">Função Solicitada</span>
+                        <span className="font-semibold text-slate-800">{sol.cargo}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-slate-400 font-medium block text-[10px] uppercase">Data do Pedido</span>
+                        <span className="font-medium text-slate-600">
+                          {new Date(sol.dataSolicitacao).toLocaleDateString('pt-BR')} às {new Date(sol.dataSolicitacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Botões de Ação */}
+                    <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleAprovarSolicitacao(sol.id, sol.nome)}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs hover:shadow-emerald-600/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <CheckCircle size={15} />
+                        <span>Autorizar Acesso</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRecusarSolicitacao(sol.id, sol.nome)}
+                        className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 text-xs font-semibold active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <X size={15} />
+                        <span>Recusar</span>
+                      </button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Histórico de Solicitações Já Avaliadas */}
+          {solicitacoes.some(s => s.status !== 'PENDENTE') && (
+            <div className="mt-8 space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Histórico Recente de Cadastros
+              </h4>
+              <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs">
+                <table className="w-full text-left text-xs text-slate-600">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+                    <tr>
+                      <th className="py-3 px-4">Nome & E-mail</th>
+                      <th className="py-3 px-4">Cargo</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Data da Avaliação</th>
+                      <th className="py-3 px-4">Aprovado Por</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {solicitacoes.filter(s => s.status !== 'PENDENTE').map(item => (
+                      <tr key={item.id} className="hover:bg-slate-50/60">
+                        <td className="py-3 px-4 font-semibold text-slate-900">
+                          {item.nome}
+                          <span className="block text-[11px] font-normal text-slate-400">{item.email}</span>
+                        </td>
+                        <td className="py-3 px-4">{item.cargo}</td>
+                        <td className="py-3 px-4">
+                          <Badge variant={item.status === 'APROVADO' ? 'success' : 'danger'}>
+                            {item.status === 'APROVADO' ? 'Autorizado' : 'Recusado'}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-slate-500">
+                          {item.dataAprovacao ? new Date(item.dataAprovacao).toLocaleDateString('pt-BR') : '-'}
+                        </td>
+                        <td className="py-3 px-4 font-medium text-slate-700">
+                          {item.aprovadoPor || 'Diretoria'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

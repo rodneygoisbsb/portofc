@@ -1,17 +1,19 @@
-import { apiClient } from './api';
+import { apiClient, isRemoteApiConfigured } from './api';
 import { CategoriaAluno, ChamadaItem, FrequenciaEstatistica } from '../types';
 
 export const frequenciaService = {
   async obterEstatisticas(categoria?: CategoriaAluno): Promise<FrequenciaEstatistica[]> {
-    try {
-      const response = await apiClient.get<FrequenciaEstatistica[]>('/frequencias/estatisticas', {
-        params: { categoria },
-      });
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        return response.data;
+    if (isRemoteApiConfigured) {
+      try {
+        const response = await apiClient.get<FrequenciaEstatistica[]>('/frequencias/estatisticas', {
+          params: { categoria },
+        });
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fallback
       }
-    } catch {
-      // Local fallback
     }
     const alunos = [
       { id: 1, nome: "Lucas Gabriel Silveira", presencas: 18, totalAulas: 20, taxa: 90.0, alerta: false },

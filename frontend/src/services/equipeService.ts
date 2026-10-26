@@ -1,16 +1,18 @@
-import { apiClient } from './api';
+import { apiClient, isRemoteApiConfigured } from './api';
 import { Colaborador, FolhaAula, FormaPagamento, StatusFolha, TetoConfig } from '../types';
 import { fallbackStorage } from './storageFallback';
 
 export const equipeService = {
   async listarColaboradores(busca?: string): Promise<Colaborador[]> {
-    try {
-      const response = await apiClient.get<Colaborador[]>('/colaboradores', { params: { busca } });
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        return response.data;
+    if (isRemoteApiConfigured) {
+      try {
+        const response = await apiClient.get<Colaborador[]>('/colaboradores', { params: { busca } });
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fallback
       }
-    } catch {
-      // Local fallback
     }
     let list = fallbackStorage.getColaboradores();
     if (busca && busca.trim()) {
@@ -46,13 +48,15 @@ export const equipeService = {
   },
 
   async listarFolhas(mesReferencia?: string): Promise<FolhaAula[]> {
-    try {
-      const response = await apiClient.get<FolhaAula[]>('/folha-aulas', { params: { mesReferencia } });
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        return response.data;
+    if (isRemoteApiConfigured) {
+      try {
+        const response = await apiClient.get<FolhaAula[]>('/folha-aulas', { params: { mesReferencia } });
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fallback
       }
-    } catch {
-      // Local fallback
     }
     let list = fallbackStorage.getFolhas();
     if (mesReferencia) {
