@@ -27,11 +27,12 @@ import {
 import { Card } from '../../ui/Card';
 import { Badge } from '../../ui/Badge';
 import { dashboardService } from '../../../services/dashboardService';
+import { fallbackStorage } from '../../../services/storageFallback';
 import { DashboardStats } from '../../../types';
 
 export const DashboardModule: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats>(() => fallbackStorage.getDashboardStats());
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -41,9 +42,12 @@ export const DashboardModule: React.FC = () => {
     try {
       setLoading(true);
       const data = await dashboardService.getStats();
-      setStats(data);
+      if (data) {
+        setStats(data);
+      }
     } catch (e) {
-      console.error(e);
+      console.error('Erro ao carregar dados do dashboard:', e);
+      setStats(fallbackStorage.getDashboardStats());
     } finally {
       setLoading(false);
     }
@@ -55,13 +59,14 @@ export const DashboardModule: React.FC = () => {
 
   const COLORS = ['#1d4ed8', '#059669', '#d97706', '#dc2626', '#7c3aed', '#0891b2', '#db2777'];
 
-  if (loading || !stats) {
+  if (loading && !stats) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
+
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">

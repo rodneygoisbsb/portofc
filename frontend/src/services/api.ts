@@ -7,7 +7,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 3500,
 });
 
 // Interceptor para adicionar token de autenticação se disponível
