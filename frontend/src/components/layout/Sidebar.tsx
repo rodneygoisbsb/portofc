@@ -8,7 +8,6 @@ import {
   Shirt,
   FileSpreadsheet,
   ShieldCheck,
-  UserCog,
 } from 'lucide-react';
 
 export type NavTab =
@@ -35,7 +34,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
     { id: 'financeiro' as NavTab, label: 'Financeiro', icon: DollarSign },
     { id: 'materiais' as NavTab, label: 'Recursos', icon: Shirt },
     { id: 'prestacao' as NavTab, label: 'Prestação de Contas', icon: FileSpreadsheet },
-    { id: 'perfil' as NavTab, label: 'Meu Perfil', icon: UserCog },
   ];
 
   return (
