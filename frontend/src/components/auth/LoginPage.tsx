@@ -4,7 +4,7 @@ import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, UserCheck, Al
 
 export const LoginPage: React.FC = () => {
   const { login, register, loginGoogle } = useAuth();
-  
+
   // Modo da tela: 'login' ou 'cadastro'
   const [mode, setMode] = useState<'login' | 'cadastro'>('login');
 
@@ -14,7 +14,7 @@ export const LoginPage: React.FC = () => {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [nome, setNome] = useState('');
   const [cargo, setCargo] = useState('Professor(a) de Futebol (Sub-7 a Sub-9)');
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -86,7 +86,7 @@ export const LoginPage: React.FC = () => {
       <div className="w-full max-w-md relative z-10">
         {/* Main Card */}
         <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-2xl shadow-black/50">
-          
+
           {/* Header & Logo */}
           <div className="text-center mb-3">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white p-1.5 shadow-lg shadow-black/30 mb-2 ring-4 ring-slate-800/80 overflow-hidden">
@@ -105,11 +105,10 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => { setMode('login'); setErrorMsg(''); setRegistrationSuccess(null); }}
-              className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                mode === 'login'
+              className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${mode === 'login'
                   ? 'bg-blue-700 text-white shadow-md shadow-blue-700/30'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               <UserCheck size={14} />
               <span>Já tenho conta (Entrar)</span>
@@ -117,11 +116,10 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => { setMode('cadastro'); setErrorMsg(''); setRegistrationSuccess(null); }}
-              className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                mode === 'cadastro'
+              className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${mode === 'cadastro'
                   ? 'bg-blue-700 text-white shadow-md shadow-blue-700/30'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               <UserPlus size={14} />
               <span>Criar Conta (Cadastro)</span>
@@ -202,11 +200,11 @@ export const LoginPage: React.FC = () => {
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Solicitação de Acesso Registrada!</h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-sm mx-auto mb-4">
-                Seu cadastro foi enviado com sucesso. Por governança e segurança da instituição, novos acessos precisam ser autorizados previamente pela diretoria (<span className="text-blue-400 font-bold">Tainara</span> e <span className="text-blue-400 font-bold">Nayara</span>).
+                Seu cadastro foi enviado com sucesso e será analisado previamente pela diretoria
               </p>
               <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] text-slate-400 mb-5 text-left flex items-start gap-2.5">
                 <UserCheck size={16} className="text-blue-400 shrink-0 mt-0.5" />
-                <span>Assim que sua solicitação for aprovada no painel da diretoria, você poderá fazer o login normalmente com seu e-mail.</span>
+                <span>Assim que sua solicitação for aprovada, você receberá um e-mail de confirmação e poderá fazer o login normalmente.</span>
               </div>
               <button
                 type="button"
