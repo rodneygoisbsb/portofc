@@ -8,18 +8,18 @@ import { authService } from '../../../services/authService';
 
 export const PerfilModule: React.FC = () => {
   const { user } = useAuth();
-  
+
   const [nome, setNome] = useState(user?.nome || '');
   const [email, setEmail] = useState(user?.email || '');
   const [telefone, setTelefone] = useState(user?.telefone || '(61) 98100-2026');
   const [chavePix, setChavePix] = useState(user?.chavePix || user?.email || '');
   const [fotoUrl, setFotoUrl] = useState(user?.fotoUrl || '');
-  
+
   // Senha
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarNovaSenha, setConfirmarNovaSenha] = useState('');
-  
+
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -98,7 +98,7 @@ export const PerfilModule: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
             <User className="text-blue-700" size={26} />
-            <span>Meu Perfil & Configurações de Conta</span>
+            <span>Meu Perfil</span>
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             Gerencie seus dados de acesso, informações pessoais, foto institucional e credenciais.
@@ -166,7 +166,7 @@ export const PerfilModule: React.FC = () => {
                 </span>
                 <span className="px-2.5 py-1 bg-emerald-50 border border-emerald-200/80 rounded-lg text-xs font-bold text-emerald-800 flex items-center gap-1.5">
                   <ShieldCheck size={14} className="text-emerald-600" />
-                  <span>Conta Ativa & Autenticada</span>
+                  <span>Conta Ativa</span>
                 </span>
               </div>
             </div>
@@ -247,7 +247,7 @@ export const PerfilModule: React.FC = () => {
               <Key size={20} />
             </div>
             <div>
-              <h4 className="text-base font-bold text-slate-900">Segurança & Alteração de Senha</h4>
+              <h4 className="text-base font-bold text-slate-900">Segurança</h4>
               <p className="text-xs text-slate-500 mt-0.5">
                 Caso deseje mudar sua senha de acesso, preencha os campos abaixo. Deixe em branco para manter a senha atual.
               </p>
