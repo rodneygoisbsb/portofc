@@ -27,6 +27,8 @@ import {
   Package,
   Trophy,
   Users,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Card } from '../../ui/Card';
 import { Badge } from '../../ui/Badge';
@@ -52,14 +54,31 @@ export interface RubricaOrcamentaria {
 }
 
 const DEFAULT_RUBRICAS: RubricaOrcamentaria[] = [
-  { id: 'SALARIOS', nome: 'Salários / Colaboradores', periodoLabel: 'Jan a Jun (R$ 10k/mês)', previsto: 60000, comprometido: 10000, realizado: 30000 },
-  { id: 'UNIFORMES', nome: 'Uniformes e Kits', periodoLabel: 'Jan a Jun', previsto: 20000, comprometido: 0, realizado: 16500 },
-  { id: 'MATERIAIS', nome: 'Materiais Esportivos', periodoLabel: 'Jan a Jun', previsto: 12000, comprometido: 0, realizado: 5500 },
-  { id: 'TORNEIOS', nome: 'Torneios e Campeonatos', periodoLabel: 'Jan a Jun', previsto: 10000, comprometido: 2500, realizado: 3500 },
-  { id: 'EVENTOS', nome: 'Eventos Sociais', periodoLabel: 'Jan a Jun', previsto: 7000, comprometido: 0, realizado: 1800 },
-  { id: 'ADMINISTRATIVO', nome: 'Gestão Administrativa', periodoLabel: 'Jan a Jun', previsto: 6000, comprometido: 0, realizado: 1000 },
+  { id: 'SALARIOS', nome: 'Salários / Colaboradores', periodoLabel: 'Jan a Jun', previsto: 60000, comprometido: 0, realizado: 0 },
+  { id: 'UNIFORMES', nome: 'Uniformes e Kits', periodoLabel: 'Jan a Jun', previsto: 20000, comprometido: 0, realizado: 0 },
+  { id: 'MATERIAIS', nome: 'Materiais Esportivos', periodoLabel: 'Jan a Jun', previsto: 12000, comprometido: 0, realizado: 0 },
+  { id: 'TORNEIOS', nome: 'Torneios e Campeonatos', periodoLabel: 'Jan a Jun', previsto: 10000, comprometido: 0, realizado: 0 },
+  { id: 'EVENTOS', nome: 'Eventos Sociais', periodoLabel: 'Jan a Jun', previsto: 7000, comprometido: 0, realizado: 0 },
+  { id: 'ADMINISTRATIVO', nome: 'Gestão Administrativa', periodoLabel: 'Jan a Jun', previsto: 6000, comprometido: 0, realizado: 0 },
   { id: 'OUTROS', nome: 'Outros e Contingência', periodoLabel: 'Jan a Jun', previsto: 5000, comprometido: 0, realizado: 0 },
 ];
+
+const NOMES_MESES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
+
+const NOMES_MESES_CURTOS = [
+  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+];
+
+const toMesKey = (ano: number, mes: number) => `${ano}-${String(mes).padStart(2, '0')}`;
+
+const getMesAtual = (): string => {
+  const hoje = new Date();
+  return toMesKey(hoje.getFullYear(), hoje.getMonth() + 1);
+};
 
 interface LancamentoFormData {
   tipo: TipoLancamento;
@@ -101,11 +120,18 @@ export const FinanceiroModule: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filtros da Matriz Orçamentária Governamental
-  const [periodoMatriz, setPeriodoMatriz] = useState<'SEMESTRAL' | 'TRIMESTRAL' | 'MENSAL' | 'ANUAL'>('SEMESTRAL');
+  const [periodoMatriz, setPeriodoMatriz] = useState<'SEMESTRAL' | 'TRIMESTRAL' | 'MENSAL' | 'ANUAL'>('MENSAL');
   const [subPeriodoSemestre, setSubPeriodoSemestre] = useState<'JAN_JUN' | 'JUL_DEZ'>('JAN_JUN');
   const [subPeriodoTrimestre, setSubPeriodoTrimestre] = useState<'T1' | 'T2' | 'T3' | 'T4'>('T1');
-  const [subPeriodoMes, setSubPeriodoMes] = useState<string>('2026-10');
+  const [subPeriodoMes, setSubPeriodoMes] = useState<string>(getMesAtual);
   const [filtroRubrica, setFiltroRubrica] = useState<string>('TODAS');
+
+  // Popover do Calendário Mensal
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const [pickerAno, setPickerAno] = useState<number>(() => {
+    const parts = getMesAtual().split('-');
+    return parseInt(parts[0], 10) || new Date().getFullYear();
+  });
 
   // Rubricas Orçamentárias
   const [rubricas, setRubricas] = useState<RubricaOrcamentaria[]>(() => {
@@ -466,14 +492,7 @@ export const FinanceiroModule: React.FC = () => {
       };
       return `MATRIZ ORÇAMENTÁRIA & PRESTAÇÃO DE CONTAS GOVERNAMENTAL (${mapT[subPeriodoTrimestre] || 'TRIMESTRAL'})`;
     } else if (periodoMatriz === 'MENSAL') {
-      const nomesMes: Record<string, string> = {
-        '2026-08': 'AGOSTO DE 2026',
-        '2026-09': 'SETEMBRO DE 2026',
-        '2026-10': 'OUTUBRO DE 2026',
-        '2026-11': 'NOVEMBRO DE 2026',
-        '2026-12': 'DEZEMBRO DE 2026',
-      };
-      return `MATRIZ ORÇAMENTÁRIA & PRESTAÇÃO DE CONTAS GOVERNAMENTAL (${nomesMes[subPeriodoMes] || 'MENSAL'})`;
+      return `MATRIZ ORÇAMENTÁRIA & PRESTAÇÃO DE CONTAS GOVERNAMENTAL (${formatMesNome(subPeriodoMes).toUpperCase()})`;
     } else {
       return 'MATRIZ ORÇAMENTÁRIA & PRESTAÇÃO DE CONTAS GOVERNAMENTAL (EXERCÍCIO ANUAL COMPLETO)';
     }
@@ -504,27 +523,73 @@ export const FinanceiroModule: React.FC = () => {
     return 'Consolidado Anual';
   }, [periodoMatriz]);
 
-  // Cálculos consolidados da Matriz com filtro por categoria/rubrica
+  // Cálculos dinâmicos da Matriz sincronizados com os lançamentos reais (SAÍDA)
   const rubricasCalculadas = useMemo(() => {
+    // 1. Filtra lançamentos de SAÍDA que correspondem ao período selecionado
+    const lancamentosPeriodo = lancamentos.filter((l) => {
+      if (l.tipo !== 'SAIDA') return false;
+      const dataRef = l.dataPagamento || l.dataVencimento || l.dataCriacao;
+      if (!dataRef) return false;
+      const anoMes = dataRef.substring(0, 7); // ex: "2026-11"
+      const mes = parseInt(dataRef.substring(5, 7), 10);
+
+      if (periodoMatriz === 'MENSAL') {
+        return anoMes === subPeriodoMes;
+      }
+      if (periodoMatriz === 'SEMESTRAL') {
+        if (subPeriodoSemestre === 'JAN_JUN') {
+          return mes >= 1 && mes <= 6;
+        } else {
+          return mes >= 7 && mes <= 12;
+        }
+      }
+      if (periodoMatriz === 'TRIMESTRAL') {
+        if (subPeriodoTrimestre === 'T1') return mes >= 1 && mes <= 3;
+        if (subPeriodoTrimestre === 'T2') return mes >= 4 && mes <= 6;
+        if (subPeriodoTrimestre === 'T3') return mes >= 7 && mes <= 9;
+        if (subPeriodoTrimestre === 'T4') return mes >= 10 && mes <= 12;
+      }
+      // ANUAL
+      return true;
+    });
+
     let list = rubricas;
     if (filtroRubrica !== 'TODAS') {
       list = list.filter((r) => r.id === filtroRubrica);
     }
+
     return list.map((r) => {
+      // Soma os lançamentos reais pertencentes a esta categoria/rubrica
+      const lancsDaRubrica = lancamentosPeriodo.filter((l) => l.categoria === r.id);
+
+      // Realizado = Efetivamente pagos (PAGO)
+      const realizadoReal = lancsDaRubrica
+        .filter((l) => l.status === 'PAGO')
+        .reduce((acc, l) => acc + l.valor, 0);
+
+      // Comprometido = Despesas pendentes/em aberto (PENDENTE / ATRASADO / etc)
+      const comprometidoReal = lancsDaRubrica
+        .filter((l) => l.status !== 'PAGO')
+        .reduce((acc, l) => acc + l.valor, 0);
+
       const label =
         r.id === 'SALARIOS' && periodoMatriz === 'SEMESTRAL' && subPeriodoSemestre === 'JAN_JUN'
           ? 'Jan a Jun (R$ 10k/mês)'
           : periodoSubtituloLinha;
-      const saldoRestante = r.previsto - r.comprometido - r.realizado;
-      const pctExecucao = r.previsto > 0 ? (r.realizado / r.previsto) * 100 : 0;
+
+      const saldoRestante = r.previsto - comprometidoReal - realizadoReal;
+      const pctExecucao = r.previsto > 0 ? (realizadoReal / r.previsto) * 100 : 0;
+
       return {
         ...r,
+        realizado: realizadoReal,
+        comprometido: comprometidoReal,
         periodoLabelDinamico: label,
         saldoRestante,
         pctExecucao,
       };
     });
-  }, [rubricas, filtroRubrica, periodoMatriz, subPeriodoSemestre, periodoSubtituloLinha]);
+  }, [rubricas, lancamentos, filtroRubrica, periodoMatriz, subPeriodoMes, subPeriodoSemestre, subPeriodoTrimestre, periodoSubtituloLinha]);
 
   const totaisMatriz = useMemo(() => {
     const previsto = rubricasCalculadas.reduce((acc, r) => acc + r.previsto, 0);
@@ -937,17 +1002,112 @@ export const FinanceiroModule: React.FC = () => {
               )}
 
               {periodoMatriz === 'MENSAL' && (
-                <select
-                  value={subPeriodoMes}
-                  onChange={(e) => setSubPeriodoMes(e.target.value)}
-                  className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-slate-800 focus:ring-2 focus:ring-blue-600/30 cursor-pointer shadow-2xs hover:bg-slate-100 transition-colors"
-                >
-                  <option value="2026-10">Outubro / 2026</option>
-                  <option value="2026-09">Setembro / 2026</option>
-                  <option value="2026-08">Agosto / 2026</option>
-                  <option value="2026-07">Julho / 2026</option>
-                  <option value="2026-06">Junho / 2026</option>
-                </select>
+                <div className="relative">
+                  {/* Botão que abre o seletor de calendário */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const parts = subPeriodoMes.split('-');
+                      setPickerAno(parseInt(parts[0], 10) || new Date().getFullYear());
+                      setIsMonthPickerOpen((prev) => !prev);
+                    }}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 hover:bg-slate-100 transition-colors shadow-2xs cursor-pointer focus:ring-2 focus:ring-blue-600/30"
+                  >
+                    <span>{formatMesNome(subPeriodoMes)}</span>
+                    <Calendar size={13} className="text-blue-600" />
+                  </button>
+
+                  {/* Popover Calendário de Mês e Ano */}
+                  {isMonthPickerOpen && (
+                    <>
+                      {/* Backdrop para fechar ao clicar fora */}
+                      <div
+                        className="fixed inset-0 z-30"
+                        onClick={() => setIsMonthPickerOpen(false)}
+                      />
+
+                      <div className="absolute top-full left-0 mt-2 z-40 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 w-72 animate-in fade-in zoom-in-95 duration-150">
+                        {/* Header com Navegação de Ano */}
+                        <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => setPickerAno((a) => a - 1)}
+                            className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-lg transition-colors cursor-pointer"
+                            title="Ano anterior"
+                          >
+                            <ChevronLeft size={16} />
+                          </button>
+                          <span className="text-sm font-bold text-slate-800">{pickerAno}</span>
+                          <button
+                            type="button"
+                            onClick={() => setPickerAno((a) => a + 1)}
+                            className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-lg transition-colors cursor-pointer"
+                            title="Próximo ano"
+                          >
+                            <ChevronRight size={16} />
+                          </button>
+                        </div>
+
+                        {/* Grid com os 12 Meses */}
+                        <div className="grid grid-cols-3 gap-2">
+                          {NOMES_MESES_CURTOS.map((nomeCurto, idx) => {
+                            const mesNum = idx + 1;
+                            const mesKey = toMesKey(pickerAno, mesNum);
+                            const isSelected = subPeriodoMes === mesKey;
+                            const hoje = new Date();
+                            const isAtual = hoje.getFullYear() === pickerAno && hoje.getMonth() + 1 === mesNum;
+
+                            return (
+                              <button
+                                key={mesKey}
+                                type="button"
+                                onClick={() => {
+                                  setSubPeriodoMes(mesKey);
+                                  setIsMonthPickerOpen(false);
+                                }}
+                                className={`py-2 px-2 text-xs font-semibold rounded-xl transition-all cursor-pointer relative ${
+                                  isSelected
+                                    ? 'bg-blue-600 text-white shadow-xs font-bold'
+                                    : isAtual
+                                    ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+                                    : 'hover:bg-slate-100 text-slate-700'
+                                }`}
+                              >
+                                {nomeCurto}
+                                {isAtual && !isSelected && (
+                                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Atalho Mês Atual */}
+                        <div className="mt-3 pt-2.5 border-t border-slate-100 flex justify-between items-center text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const atual = getMesAtual();
+                              setSubPeriodoMes(atual);
+                              setPickerAno(new Date().getFullYear());
+                              setIsMonthPickerOpen(false);
+                            }}
+                            className="text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
+                          >
+                            Mês Atual
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsMonthPickerOpen(false)}
+                            className="text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
+                          >
+                            Fechar
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
               )}
             </div>
 
