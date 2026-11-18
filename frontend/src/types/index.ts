@@ -134,6 +134,7 @@ export interface DashboardStats {
   totalReceitasPagas: number;
   totalDespesasPagas: number;
   totalDespesasComprometidas: number;
+  orcamentoPrevisto?: number;
   totalAlunosAtivos: number;
   taxaFrequenciaGlobal: number;
   despesasPorCategoria: CategoriaDespesa[];

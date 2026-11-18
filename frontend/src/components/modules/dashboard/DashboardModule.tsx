@@ -85,12 +85,17 @@ export const DashboardModule: React.FC = () => {
           <div className="mt-4">
             <h3 className="text-2xl font-bold text-slate-900">{formatBRL(stats.saldoDisponivel)}</h3>
             <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-              <span className="font-semibold text-emerald-600">Total Recebido</span> - Total Pago
+              <span className="font-semibold text-emerald-600">
+                {stats.totalReceitasPagas > 0 ? 'Total Recebido' : 'Orçamento da Emenda'}
+              </span>{' '}
+              - Total Pago
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Receitas Pagas</span>
-            <span className="font-semibold text-slate-800">{formatBRL(stats.totalReceitasPagas)}</span>
+            <span>{stats.totalReceitasPagas > 0 ? 'Receitas Pagas' : 'Teto Global da Emenda'}</span>
+            <span className="font-semibold text-slate-800">
+              {formatBRL(stats.totalReceitasPagas > 0 ? stats.totalReceitasPagas : (stats.orcamentoPrevisto || 120000))}
+            </span>
           </div>
         </Card>
 

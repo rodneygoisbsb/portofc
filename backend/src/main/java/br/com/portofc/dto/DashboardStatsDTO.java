@@ -20,6 +20,7 @@ public class DashboardStatsDTO {
     private BigDecimal totalReceitasPagas;
     private BigDecimal totalDespesasPagas;
     private BigDecimal totalDespesasComprometidas;
+    private BigDecimal orcamentoPrevisto;
 
     // Resumo de Alunos e Frequência
     private long totalAlunosAtivos;

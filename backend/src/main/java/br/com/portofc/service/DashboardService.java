@@ -31,18 +31,28 @@ public class DashboardService {
     public DashboardStatsDTO obterEstatisticas() {
         // Métricas financeiras
         BigDecimal totalReceitasPagas = lancamentoRepository.sumValorByTipoAndStatus(TipoLancamento.ENTRADA, StatusFinanceiro.PAGO);
+        if (totalReceitasPagas == null) totalReceitasPagas = BigDecimal.ZERO;
+
         BigDecimal totalDespesasPagas = lancamentoRepository.sumValorByTipoAndStatus(TipoLancamento.SAIDA, StatusFinanceiro.PAGO);
+        if (totalDespesasPagas == null) totalDespesasPagas = BigDecimal.ZERO;
         
         BigDecimal despesasPendentes = lancamentoRepository.sumValorByTipoAndStatus(TipoLancamento.SAIDA, StatusFinanceiro.PENDENTE);
+        if (despesasPendentes == null) despesasPendentes = BigDecimal.ZERO;
+
         BigDecimal despesasProgramadas = lancamentoRepository.sumValorByTipoAndStatus(TipoLancamento.SAIDA, StatusFinanceiro.PROGRAMADO);
+        if (despesasProgramadas == null) despesasProgramadas = BigDecimal.ZERO;
+
         BigDecimal totalDespesasComprometidas = despesasPendentes.add(despesasProgramadas);
 
-        // Fórmulas de negócio estritas do agent.md:
-        // Saldo Disponível = Total Recebido (Pago) - Total Gasto (Pago)
-        BigDecimal saldoDisponivel = totalReceitasPagas.subtract(totalDespesasPagas);
+        // Se não houver lançamentos de receitas registradas (ENTRADA), o recurso base é o teto global pactuado da emenda (R$ 120.000,00)
+        BigDecimal orcamentoPrevisto = BigDecimal.valueOf(120000.00);
+        BigDecimal recursoBase = totalReceitasPagas.compareTo(BigDecimal.ZERO) > 0 ? totalReceitasPagas : orcamentoPrevisto;
 
-        // Saldo Livre = Total Recebido - (Total Pago + Despesas Comprometidas/Programadas)
-        BigDecimal saldoLivre = totalReceitasPagas.subtract(totalDespesasPagas.add(totalDespesasComprometidas));
+        // Saldo Disponível = Recurso Base (Receitas ou Teto da Emenda) - Total Pago
+        BigDecimal saldoDisponivel = recursoBase.subtract(totalDespesasPagas);
+
+        // Saldo Livre = Saldo Disponível - Despesas Comprometidas
+        BigDecimal saldoLivre = saldoDisponivel.subtract(totalDespesasComprometidas);
 
         // Resumo de Alunos
         long alunosAtivos = alunoRepository.countByStatus(StatusAluno.ATIVO);
@@ -83,6 +93,7 @@ public class DashboardService {
                 .totalReceitasPagas(totalReceitasPagas)
                 .totalDespesasPagas(totalDespesasPagas)
                 .totalDespesasComprometidas(totalDespesasComprometidas)
+                .orcamentoPrevisto(orcamentoPrevisto)
                 .totalAlunosAtivos(alunosAtivos)
                 .taxaFrequenciaGlobal(taxaGlobal)
                 .despesasPorCategoria(despesasPorCategoria)

@@ -19,11 +19,12 @@ export const INITIAL_FOLHAS_DATA: FolhaAula[] = [];
 export const INITIAL_ORCAMENTOS_DATA: OrcamentoMes[] = [];
 
 export const INITIAL_DASHBOARD_STATS: DashboardStats = {
-  saldoDisponivel: 0,
-  saldoLivre: 0,
+  saldoDisponivel: 120000,
+  saldoLivre: 120000,
   totalReceitasPagas: 0,
   totalDespesasPagas: 0,
   totalDespesasComprometidas: 0,
+  orcamentoPrevisto: 120000,
   totalAlunosAtivos: 0,
   taxaFrequenciaGlobal: 0,
   despesasPorCategoria: [],
@@ -369,7 +370,34 @@ export const fallbackStorage = {
         }
       });
 
-    const saldoDisponivel = totalReceitasPagas - totalDespesasPagas;
+    const getOrcamentoTeto = (): number => {
+      try {
+        const savedConfig = localStorage.getItem('portofc_teto_config');
+        if (savedConfig) {
+          const cfg = JSON.parse(savedConfig);
+          if (cfg && Number(cfg.total) > 0) return Number(cfg.total);
+        }
+        const savedRubricas = localStorage.getItem('portofc_matriz_rubricas');
+        if (savedRubricas) {
+          const rubricas = JSON.parse(savedRubricas);
+          if (Array.isArray(rubricas) && rubricas.length > 0) {
+            const soma = rubricas.reduce(
+              (acc: number, r: { previsto?: number }) => acc + (Number(r.previsto) || 0),
+              0
+            );
+            if (soma > 0) return soma;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+      return 120000;
+    };
+
+    const orcamentoPrevisto = getOrcamentoTeto();
+    // Se houver receitas (ENTRADA) lançadas, utiliza-as; caso contrário, toma como base o teto global da emenda pactuada
+    const recursoBase = totalReceitasPagas > 0 ? totalReceitasPagas : orcamentoPrevisto;
+    const saldoDisponivel = recursoBase - totalDespesasPagas;
     const saldoLivre = saldoDisponivel - totalDespesasComprometidas;
     const totalAlunosAtivos = alunos.filter((a) => a.status === 'ATIVO').length;
 
@@ -420,6 +448,7 @@ export const fallbackStorage = {
       totalReceitasPagas,
       totalDespesasPagas,
       totalDespesasComprometidas,
+      orcamentoPrevisto,
       totalAlunosAtivos,
       taxaFrequenciaGlobal,
       despesasPorCategoria,
