@@ -649,7 +649,7 @@ export const FrequenciaModule: React.FC = () => {
             </div>
           </div>
 
-          <div ref={topActionsRef} className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
               onClick={() => setIsModalEstatisticasOpen(true)}
@@ -659,34 +659,6 @@ export const FrequenciaModule: React.FC = () => {
               <BarChart3 size={14} className="text-blue-600" />
               <span>Filtrar Frequência</span>
             </button>
-
-            {alunosFiltrados.length > 0 && (
-              <>
-                <button
-                  type="button"
-                  onClick={markAllPresent}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs active:scale-95 transition-all cursor-pointer"
-                  title="Marcar todos os alunos desta lista como presentes"
-                >
-                  <CheckCheck size={14} className="text-blue-600" />
-                  Todos Presentes
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleSalvarChamada}
-                  disabled={saving}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs hover:shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {saving ? (
-                    <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Save size={14} />
-                  )}
-                  {statusChamada === 'SALVA' ? 'Atualizar Frequência' : 'Salvar Frequência'}
-                </button>
-              </>
-            )}
           </div>
         </div>
       </Card>
@@ -801,7 +773,7 @@ export const FrequenciaModule: React.FC = () => {
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Lista de Atletas Convocados ({alunosFiltrados.length})
               </span>
-              <div className="flex items-center gap-2">
+              <div ref={topActionsRef} className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={markAllPresent}
