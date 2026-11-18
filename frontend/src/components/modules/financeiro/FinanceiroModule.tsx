@@ -36,7 +36,10 @@ import { Button } from '../../ui/Button';
 import { Modal } from '../../ui/Modal';
 import { EmptyState } from '../../ui/EmptyState';
 import { financeiroService } from '../../../services/financeiroService';
+import { equipeService } from '../../../services/equipeService';
 import {
+  Colaborador,
+  FolhaAula,
   FormaPagamento,
   LancamentoFinanceiro,
   OrcamentoMes,
@@ -112,6 +115,8 @@ export const FinanceiroModule: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'matriz' | 'extrato'>('matriz');
   const [lancamentos, setLancamentos] = useState<LancamentoFinanceiro[]>([]);
   const [orcamentos, setOrcamentos] = useState<OrcamentoMes[]>([]);
+  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+  const [folhas, setFolhas] = useState<FolhaAula[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
@@ -235,12 +240,16 @@ export const FinanceiroModule: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [lancs, orcs] = await Promise.all([
+      const [lancs, orcs, colabs, flhs] = await Promise.all([
         financeiroService.listarLancamentos(),
         financeiroService.obterOrcamento(),
+        equipeService.listarColaboradores().catch(() => []),
+        equipeService.listarFolhas().catch(() => []),
       ]);
       setLancamentos(lancs);
       setOrcamentos(orcs);
+      setColaboradores(colabs);
+      setFolhas(flhs);
     } catch (e) {
       console.error(e);
     } finally {
@@ -563,14 +572,50 @@ export const FinanceiroModule: React.FC = () => {
       const lancsDaRubrica = lancamentosPeriodo.filter((l) => l.categoria === r.id);
 
       // Realizado = Efetivamente pagos (PAGO)
-      const realizadoReal = lancsDaRubrica
+      let realizadoReal = lancsDaRubrica
         .filter((l) => l.status === 'PAGO')
         .reduce((acc, l) => acc + l.valor, 0);
 
       // Comprometido = Despesas pendentes/em aberto (PENDENTE / ATRASADO / etc)
-      const comprometidoReal = lancsDaRubrica
+      let comprometidoReal = lancsDaRubrica
         .filter((l) => l.status !== 'PAGO')
         .reduce((acc, l) => acc + l.valor, 0);
+
+      // Regra especial para SALARIOS:
+      // Se houver colaboradores ativos cadastrados no mês que ainda NÃO foram pagos,
+      // a folha prevista pendente conta automaticamente como COMPROMETIDO!
+      if (r.id === 'SALARIOS' && periodoMatriz === 'MENSAL') {
+        const colabsAtivos = colaboradores.filter((c) => c.status !== 'INATIVO');
+        let salariosPendentesMes = 0;
+
+        colabsAtivos.forEach((c) => {
+          // Verifica se já tem folha desse mês
+          const folhaMes = folhas.find(
+            (f) => f.colaboradorId === c.id && f.mesReferencia === subPeriodoMes
+          );
+
+          const isPago = folhaMes?.status === 'PAGO' || lancsDaRubrica.some(
+            (l) => l.colaboradorId === c.id && l.status === 'PAGO'
+          );
+
+          if (!isPago) {
+            // Calcula o valor líquido previsto do colaborador
+            if (folhaMes && folhaMes.liquidoPagar > 0) {
+              salariosPendentesMes += folhaMes.liquidoPagar;
+            } else {
+              const isHorista = c.tipoContratacao === 'HORISTA';
+              const vHora = isHorista ? (c.valorHora || 50) : 0;
+              const hReg = isHorista ? 40 : 160;
+              const bruto = isHorista ? hReg * vHora : (c.salarioFixo || 0);
+              const ben = c.beneficios || 0;
+              salariosPendentesMes += (bruto + ben);
+            }
+          }
+        });
+
+        // Se o cálculo da folha pendente for maior que os lançamentos pendentes avulsos, usa a folha da equipe
+        comprometidoReal = Math.max(comprometidoReal, salariosPendentesMes);
+      }
 
       const label =
         r.id === 'SALARIOS' && periodoMatriz === 'SEMESTRAL' && subPeriodoSemestre === 'JAN_JUN'
