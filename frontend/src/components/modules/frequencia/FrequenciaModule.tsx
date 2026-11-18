@@ -605,52 +605,53 @@ export const FrequenciaModule: React.FC = () => {
 
         {/* Linha 2: Seletor de Turma e Horário de Treino + Botão Discreto de Filtrar Frequência */}
         <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 bg-slate-50/50 p-2.5 rounded-xl">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Turma:
-            </span>
-            <select
-              value={turmaSelecionada}
-              onChange={(e) => {
-                setTurmaSelecionada(e.target.value);
-                setHorarioSelecionado('TODOS');
-              }}
-              className="text-xs font-semibold bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600/30 cursor-pointer shadow-2xs"
-            >
-              <option value="TODAS">Todas as Turmas ({turmasDaCategoria.length})</option>
-              {turmasDaCategoria.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-              <Clock size={13} className="text-slate-400" />
-              Horário:
-            </span>
-            <select
-              value={horarioSelecionado}
-              onChange={(e) => setHorarioSelecionado(e.target.value)}
-              className="text-xs font-semibold bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600/30 cursor-pointer shadow-2xs"
-            >
-              <option value="TODOS">Todos os Horários ({horariosDaCategoria.length})</option>
-              {horariosDaCategoria.map((h) => (
-                <option key={h} value={h}>
-                  {h}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="ml-auto flex items-center gap-3">
-            <div className="text-xs text-slate-500">
-              Exibindo <strong>{alunosFiltrados.length}</strong> de <strong>{alunosCategoria.length}</strong> atletas
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Turma:
+              </span>
+              <select
+                value={turmaSelecionada}
+                onChange={(e) => {
+                  setTurmaSelecionada(e.target.value);
+                  setHorarioSelecionado('TODOS');
+                }}
+                className="text-xs font-semibold bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600/30 cursor-pointer shadow-2xs"
+              >
+                <option value="TODAS">Todas as Turmas ({turmasDaCategoria.length})</option>
+                {turmasDaCategoria.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Botão reservado e discreto para abrir modal de estatísticas */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                <Clock size={13} className="text-slate-400" />
+                Horário:
+              </span>
+              <select
+                value={horarioSelecionado}
+                onChange={(e) => setHorarioSelecionado(e.target.value)}
+                className="text-xs font-semibold bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600/30 cursor-pointer shadow-2xs"
+              >
+                <option value="TODOS">Todos os Horários ({horariosDaCategoria.length})</option>
+                {horariosDaCategoria.map((h) => (
+                  <option key={h} value={h}>
+                    {h}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="text-xs text-slate-500 ml-1">
+              Exibindo <strong>{alunosFiltrados.length}</strong> de <strong>{alunosCategoria.length}</strong> atletas
+            </div>
+          </div>
+
+          <div ref={topActionsRef} className="ml-auto flex items-center gap-2">
             <button
               type="button"
               onClick={() => setIsModalEstatisticasOpen(true)}
@@ -660,6 +661,34 @@ export const FrequenciaModule: React.FC = () => {
               <BarChart3 size={14} className="text-blue-600" />
               <span>Filtrar Frequência</span>
             </button>
+
+            {alunosFiltrados.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={markAllPresent}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs active:scale-95 transition-all cursor-pointer"
+                  title="Marcar todos os alunos desta lista como presentes"
+                >
+                  <CheckCheck size={14} className="text-blue-600" />
+                  Todos Presentes
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSalvarChamada}
+                  disabled={saving}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs hover:shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {saving ? (
+                    <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Save size={14} />
+                  )}
+                  {statusChamada === 'SALVA' ? 'Atualizar Frequência' : 'Salvar Frequência'}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </Card>
@@ -682,7 +711,7 @@ export const FrequenciaModule: React.FC = () => {
         </div>
       ) : (
         <div
-          className={`p-4 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs sm:text-sm font-medium transition-all shadow-xs ${
+          className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-medium transition-all shadow-xs ${
             statusChamada === 'SALVA'
               ? 'bg-emerald-50/80 border-emerald-200 text-emerald-800'
               : 'bg-amber-50/80 border-amber-200 text-amber-900'
@@ -707,41 +736,13 @@ export const FrequenciaModule: React.FC = () => {
                 </span>
               ) : (
                 <span>
-                  <strong>Frequência Pendente</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)}). Marque as presenças da turma e clique em <em>Salvar Frequência</em>.
+                  <strong>Frequência Pendente</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)}). Marque as presenças da turma na lista abaixo.
                 </span>
               )}
             </div>
           </div>
 
-          <div className="shrink-0 self-end md:self-auto flex items-center gap-2.5">
-            {alunosFiltrados.length > 0 && (
-              <div ref={topActionsRef} className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={markAllPresent}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-2xs active:scale-95 transition-all cursor-pointer"
-                  title="Marcar todos os alunos desta lista como presentes"
-                >
-                  <CheckCheck size={14} className="text-blue-600" />
-                  Todos Presentes
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleSalvarChamada}
-                  disabled={saving}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs hover:shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {saving ? (
-                    <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Save size={14} />
-                  )}
-                  {statusChamada === 'SALVA' ? 'Atualizar Frequência' : 'Salvar Frequência'}
-                </button>
-              </div>
-            )}
-
+          <div className="shrink-0 self-end sm:self-auto">
             <Badge variant={statusChamada === 'SALVA' ? 'success' : 'warning'}>
               {statusChamada === 'SALVA' ? 'Realizada' : 'Pendente'}
             </Badge>
