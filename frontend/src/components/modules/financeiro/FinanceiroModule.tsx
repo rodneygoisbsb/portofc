@@ -908,15 +908,36 @@ export const FinanceiroModule: React.FC = () => {
         </button>
       </div>
 
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Financeiro</h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Lançamento de receitas e despesas, controle orçamentário e comprovantes.
-          </p>
+      {/* Navegação por Abas na mesma linha dos botões de ação */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200">
+        <div className="flex items-center gap-2 pb-px overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setActiveTab('matriz')}
+            className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'matriz'
+                ? 'border-blue-700 text-blue-700 font-bold'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <BarChart3 size={16} />
+            Matriz Orçamentária Governamental
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('extrato')}
+            className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'extrato'
+                ? 'border-blue-700 text-blue-700 font-bold'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <FileText size={16} />
+            Extrato & Livro-Caixa ({lancamentos.length})
+          </button>
         </div>
-        <div ref={topActionsRef} className="flex items-center gap-2.5">
+
+        <div ref={topActionsRef} className="flex items-center gap-2.5 pb-2 sm:pb-0 shrink-0">
           <Button
             variant="outline"
             icon={<BarChart3 size={18} />}
@@ -928,34 +949,6 @@ export const FinanceiroModule: React.FC = () => {
             Novo Lançamento
           </Button>
         </div>
-      </div>
-
-      {/* Navegação por Abas: Matriz Orçamentária Governamental & Extrato Livro-Caixa */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
-        <button
-          type="button"
-          onClick={() => setActiveTab('matriz')}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
-            activeTab === 'matriz'
-              ? 'bg-blue-700 text-white shadow-xs font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          <BarChart3 size={16} />
-          Matriz Orçamentária Governamental
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('extrato')}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
-            activeTab === 'extrato'
-              ? 'bg-blue-700 text-white shadow-xs font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          <FileText size={16} />
-          Extrato & Livro-Caixa ({lancamentos.length})
-        </button>
       </div>
 
       {activeTab === 'matriz' ? (

@@ -298,15 +298,26 @@ export const MateriaisModule: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Recursos</h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Uniformes, materiais, torneios, eventos e gastos administrativos da ONG em um só lugar.
-          </p>
+      {/* Sub-abas de Recursos na mesma linha dos botões de ação */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200">
+        <div className="flex items-center gap-2 overflow-x-auto pb-px">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'border-blue-700 text-blue-700 font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-2 pb-2 sm:pb-0 shrink-0">
           {activeTab === 'uniformes' && (
             <Button variant="emerald" icon={<Plus size={18} />} onClick={handleOpenCreateUniforme}>
               Nova Grade / Tamanho
@@ -318,24 +329,6 @@ export const MateriaisModule: React.FC = () => {
             </Button>
           )}
         </div>
-      </div>
-
-      {/* Sub-abas de Recursos */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-px overflow-x-auto">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${
-              activeTab === tab.id
-                ? 'border-blue-700 text-blue-700 font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
       </div>
 
       {activeTab === 'torneios' && (

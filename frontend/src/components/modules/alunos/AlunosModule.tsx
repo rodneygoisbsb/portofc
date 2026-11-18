@@ -304,64 +304,29 @@ export const AlunosModule: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Gestão de Alunos</h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Controle de matrículas, turmas, frequências e prontuário esportivo.
-          </p>
-        </div>
-        <Button variant="emerald" icon={<Plus size={18} />} onClick={handleOpenCreateModal}>
-          Adicionar Aluno
-        </Button>
-      </div>
-
-      {/* Alerta de Aniversários Próximos (Até 5 dias de antecedência - sem exibir lista de nomes) */}
-      {aniversariantesProximos.length > 0 && (
-        <div className="bg-gradient-to-r from-amber-500/10 via-amber-400/15 to-orange-400/10 border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs animate-in fade-in">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-amber-500/20">
-              <Cake size={20} />
-            </div>
-            <div>
-              <h4 className="font-bold text-amber-950 text-sm flex items-center gap-2">
-                Aniversários Próximos ({aniversariantesProximos.length} {aniversariantesProximos.length === 1 ? 'aluno' : 'alunos'})
-                <span className="text-[11px] font-semibold text-amber-800 bg-amber-100/90 border border-amber-200 px-2 py-0.5 rounded-full">
-                  Próximos 5 dias
-                </span>
-              </h4>
-              <p className="text-xs text-amber-900/80 mt-0.5">
-                Há atletas fazendo aniversário nos próximos 5 dias. Utilize o filtro ao lado para identificá-los na lista.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setFilterOnlyBirthdays(!filterOnlyBirthdays)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shadow-xs ${filterOnlyBirthdays
-              ? 'bg-amber-600 text-white'
-              : 'bg-white text-amber-900 border border-amber-300 hover:bg-amber-50'
+      {/* Sub-abas de Categorias de Alunos com Linha Inferior Destacada e Botão de Ação alinhado */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200">
+        <div className="flex items-center gap-2 overflow-x-auto pb-px">
+          {categories.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => setSelectedCategoria(cat.key)}
+              className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${
+                selectedCategoria === cat.key
+                  ? 'border-blue-700 text-blue-700 font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
-          >
-            {filterOnlyBirthdays ? 'Exibir Todos os Alunos' : 'Filtrar Apenas Aniversariantes'}
-          </button>
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
-      )}
 
-      {/* Pill Tabs Categories */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        {categories.map((cat) => (
-          <button
-            key={cat.key}
-            onClick={() => setSelectedCategoria(cat.key)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${selectedCategoria === cat.key
-              ? 'bg-blue-700 text-white shadow-sm shadow-blue-700/20'
-              : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
-              }`}
-          >
-            {cat.label}
-          </button>
-        ))}
+        <div className="pb-2 sm:pb-0 shrink-0">
+          <Button variant="emerald" icon={<Plus size={18} />} onClick={handleOpenCreateModal}>
+            Adicionar Aluno
+          </Button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}

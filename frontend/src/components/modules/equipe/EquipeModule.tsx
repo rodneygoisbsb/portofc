@@ -841,63 +841,58 @@ export const EquipeModule: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Equipe</h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Gestão dos colaboradores e controle financeiro.
-          </p>
+      {/* Tabs com o botão Novo Colaborador alinhado na mesma linha */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200">
+        <div className="flex items-center gap-2 pb-px overflow-x-auto">
+          <button
+            onClick={() => setActiveTab('folha')}
+            className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'folha'
+              ? 'border-blue-700 text-blue-700 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+          >
+            <DollarSign size={17} />
+            Folha de Pagamento
+          </button>
+          <button
+            onClick={() => setActiveTab('colaboradores')}
+            className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'colaboradores'
+              ? 'border-blue-700 text-blue-700 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+          >
+            <Briefcase size={17} />
+            <span>Colaboradores</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
+              {colaboradores.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('solicitacoes')}
+            className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'solicitacoes'
+              ? 'border-blue-700 text-blue-700 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+          >
+            <UserCheck size={17} />
+            <span>Aprovações de Cadastro</span>
+            {solicitacoesPendentes.length > 0 ? (
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-bold animate-pulse">
+                {solicitacoesPendentes.length} {solicitacoesPendentes.length === 1 ? 'pendente' : 'pendentes'}
+              </span>
+            ) : (
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                0
+              </span>
+            )}
+          </button>
         </div>
-        <Button variant="emerald" icon={<UserPlus size={18} />} onClick={handleOpenCreateModal}>
-          Novo Colaborador
-        </Button>
-      </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-px overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('folha')}
-          className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'folha'
-            ? 'border-blue-700 text-blue-700'
-            : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-        >
-          <DollarSign size={17} />
-          Folha de Pagamento
-        </button>
-        <button
-          onClick={() => setActiveTab('colaboradores')}
-          className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'colaboradores'
-            ? 'border-blue-700 text-blue-700'
-            : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-        >
-          <Briefcase size={17} />
-          <span>Colaboradores</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
-            {colaboradores.length}
-          </span>
-        </button>
-        <button
-          onClick={() => setActiveTab('solicitacoes')}
-          className={`pb-3 px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'solicitacoes'
-            ? 'border-blue-700 text-blue-700'
-            : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-        >
-          <UserCheck size={17} />
-          <span>Aprovações de Cadastro</span>
-          {solicitacoesPendentes.length > 0 ? (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-bold animate-pulse">
-              {solicitacoesPendentes.length} {solicitacoesPendentes.length === 1 ? 'pendente' : 'pendentes'}
-            </span>
-          ) : (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">
-              0
-            </span>
-          )}
-        </button>
+        <div className="pb-2 sm:pb-0 shrink-0">
+          <Button variant="emerald" icon={<UserPlus size={18} />} onClick={handleOpenCreateModal}>
+            Novo Colaborador
+          </Button>
+        </div>
       </div>
 
       {/* Alerta Discreto de Aniversários Próximos */}

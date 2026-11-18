@@ -471,30 +471,6 @@ export const FrequenciaModule: React.FC = () => {
         </button>
       </div>
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Frequência Diária</h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Registro e acompanhamento ágil de presenças por Categoria, Turma e Horário de treino.
-          </p>
-        </div>
-        <div ref={topActionsRef} className="flex items-center gap-2">
-          <Button variant="outline" size="md" icon={<CheckCheck size={16} />} onClick={markAllPresent}>
-            Todos Presentes
-          </Button>
-          <Button
-            variant="emerald"
-            size="md"
-            icon={<Save size={16} />}
-            loading={saving}
-            onClick={handleSalvarChamada}
-          >
-            {statusChamada === 'SALVA' ? 'Atualizar Frequência' : 'Salvar Frequência'}
-          </Button>
-        </div>
-      </div>
-
       {feedbackMsg && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center gap-2 text-sm font-medium animate-in fade-in">
           <CheckCircle size={18} className="text-emerald-600 shrink-0" />
@@ -737,7 +713,35 @@ export const FrequenciaModule: React.FC = () => {
             </div>
           </div>
 
-          <div className="shrink-0 self-end md:self-auto">
+          <div className="shrink-0 self-end md:self-auto flex items-center gap-2.5">
+            {alunosFiltrados.length > 0 && (
+              <div ref={topActionsRef} className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={markAllPresent}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-2xs active:scale-95 transition-all cursor-pointer"
+                  title="Marcar todos os alunos desta lista como presentes"
+                >
+                  <CheckCheck size={14} className="text-blue-600" />
+                  Todos Presentes
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSalvarChamada}
+                  disabled={saving}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs hover:shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {saving ? (
+                    <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Save size={14} />
+                  )}
+                  {statusChamada === 'SALVA' ? 'Atualizar Frequência' : 'Salvar Frequência'}
+                </button>
+              </div>
+            )}
+
             <Badge variant={statusChamada === 'SALVA' ? 'success' : 'warning'}>
               {statusChamada === 'SALVA' ? 'Realizada' : 'Pendente'}
             </Badge>
@@ -793,88 +797,151 @@ export const FrequenciaModule: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600">
-              <thead className="bg-slate-50/70 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                <tr>
-                  <th className="py-4 px-6">Aluno</th>
-                  <th className="py-4 px-4 text-center">Turma & Horário</th>
-                  <th className="py-4 px-4 text-center">Presença na Aula</th>
-                  <th className="py-4 px-6">Observação do Instrutor</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {alunosFiltrados.map((aluno) => {
-                  const isPresente = presencas[aluno.id] !== false;
-                  const turmaNome = aluno.turma || (aluno.turmaHorario?.includes(' - ') ? aluno.turmaHorario.split(' - ')[0] : aluno.turmaHorario) || 'Padrão';
-                  const horarioTreino = aluno.horarioTreino || (aluno.turmaHorario?.includes(' - ') ? aluno.turmaHorario.split(' - ').slice(1).join(' - ') : null) || 'A definir';
+          <div>
+            <div className="px-6 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Lista de Atletas Convocados ({alunosFiltrados.length})
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={markAllPresent}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
+                  title="Marcar todos como presentes"
+                >
+                  <CheckCheck size={13} className="text-blue-600" />
+                  Todos Presentes
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSalvarChamada}
+                  disabled={saving}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {saving ? (
+                    <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Save size={13} />
+                  )}
+                  {statusChamada === 'SALVA' ? 'Atualizar' : 'Salvar'}
+                </button>
+              </div>
+            </div>
 
-                  return (
-                    <tr key={aluno.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={aluno.fotoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
-                            alt={aluno.nome}
-                            className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100"
-                          />
-                          <div>
-                            <p className="font-semibold text-slate-900 leading-tight">{aluno.nome}</p>
-                            <p className="text-xs text-slate-400 mt-0.5">
-                              Resp: {aluno.responsavel}
-                            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600">
+                <thead className="bg-slate-50/70 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <tr>
+                    <th className="py-4 px-6">Aluno</th>
+                    <th className="py-4 px-4 text-center">Turma & Horário</th>
+                    <th className="py-4 px-4 text-center">Presença na Aula</th>
+                    <th className="py-4 px-6">Observação do Instrutor</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {alunosFiltrados.map((aluno) => {
+                    const isPresente = presencas[aluno.id] !== false;
+                    const turmaNome = aluno.turma || (aluno.turmaHorario?.includes(' - ') ? aluno.turmaHorario.split(' - ')[0] : aluno.turmaHorario) || 'Padrão';
+                    const horarioTreino = aluno.horarioTreino || (aluno.turmaHorario?.includes(' - ') ? aluno.turmaHorario.split(' - ').slice(1).join(' - ') : null) || 'A definir';
+
+                    return (
+                      <tr key={aluno.id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={aluno.fotoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+                              alt={aluno.nome}
+                              className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100"
+                            />
+                            <div>
+                              <p className="font-semibold text-slate-900 leading-tight">{aluno.nome}</p>
+                              <p className="text-xs text-slate-400 mt-0.5">
+                                Resp: {aluno.responsavel}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      <td className="py-4 px-4 text-center">
-                        <div className="inline-flex flex-col items-center gap-0.5">
-                          <span className="text-xs font-semibold text-slate-800 whitespace-nowrap">{turmaNome}</span>
-                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium whitespace-nowrap">
-                            <Clock size={11} className="text-slate-400 shrink-0" />
-                            {horarioTreino}
-                          </span>
-                        </div>
-                      </td>
+                        <td className="py-4 px-4 text-center">
+                          <div className="inline-flex flex-col items-center gap-0.5">
+                            <span className="text-xs font-semibold text-slate-800 whitespace-nowrap">{turmaNome}</span>
+                            <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium whitespace-nowrap">
+                              <Clock size={11} className="text-slate-400 shrink-0" />
+                              {horarioTreino}
+                            </span>
+                          </div>
+                        </td>
 
-                      <td className="py-4 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => togglePresenca(aluno.id)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all active:scale-95 ${
-                            isPresente
-                              ? 'bg-emerald-600 text-white shadow-xs hover:bg-emerald-700'
-                              : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
-                          }`}
-                        >
-                          {isPresente ? (
-                            <>
-                              <CheckCircle size={14} /> Presente
-                            </>
-                          ) : (
-                            <>
-                              <XCircle size={14} /> Faltou
-                            </>
-                          )}
-                        </button>
-                      </td>
+                        <td className="py-4 px-4 text-center">
+                          <button
+                            type="button"
+                            onClick={() => togglePresenca(aluno.id)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all active:scale-95 ${
+                              isPresente
+                                ? 'bg-emerald-600 text-white shadow-xs hover:bg-emerald-700'
+                                : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+                            }`}
+                          >
+                            {isPresente ? (
+                              <>
+                                <CheckCircle size={14} /> Presente
+                              </>
+                            ) : (
+                              <>
+                                <XCircle size={14} /> Faltou
+                              </>
+                            )}
+                          </button>
+                        </td>
 
-                      <td className="py-4 px-6">
-                        <input
-                          type="text"
-                          value={observacoes[aluno.id] || ''}
-                          onChange={(e) =>
-                            setObservacoes({ ...observacoes, [aluno.id]: e.target.value })
-                          }
-                          placeholder="Ex: Treino tático concluído / Falta justificada..."
-                          className="w-full text-xs bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-600"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <td className="py-4 px-6">
+                          <input
+                            type="text"
+                            value={observacoes[aluno.id] || ''}
+                            onChange={(e) =>
+                              setObservacoes({ ...observacoes, [aluno.id]: e.target.value })
+                            }
+                            placeholder="Ex: Treino tático concluído / Falta justificada..."
+                            className="w-full text-xs bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {alunosFiltrados.length > 6 && (
+              <div className="px-6 py-3 bg-slate-50/60 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-xs text-slate-500">
+                  Total de <strong>{alunosFiltrados.length}</strong> atletas listados
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={markAllPresent}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
+                  >
+                    <CheckCheck size={13} className="text-blue-600" />
+                    Todos Presentes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSalvarChamada}
+                    disabled={saving}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {saving ? (
+                      <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Save size={13} />
+                    )}
+                    {statusChamada === 'SALVA' ? 'Atualizar Frequência' : 'Salvar Frequência'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Card>
