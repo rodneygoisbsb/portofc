@@ -658,38 +658,37 @@ export const FrequenciaModule: React.FC = () => {
 
       {/* Banner de Status Reativo da Chamada para a Data Selecionada */}
       {!turmaTemTreinoNaData || (alunosFiltrados.length === 0 && alunosCategoria.length > 0) ? (
-        <div className="p-4 rounded-2xl border bg-amber-50/40 border-amber-200/50 text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-medium transition-all shadow-2xs">
+        <div className="p-4 rounded-2xl border bg-amber-50/20 border-amber-100/60 text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-normal transition-all shadow-2xs">
           <div className="flex items-center gap-2.5">
-            <CalendarOff size={20} className="text-amber-500 shrink-0" />
+            <CalendarOff size={18} className="text-amber-400/80 shrink-0" />
             <div>
-              <strong className="text-amber-700 font-semibold">Sem treino programado</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)}).
-              <span className="block sm:inline sm:ml-1 text-slate-500">
+              <span className="font-medium text-amber-700/75">Sem treino programado</span> para {nomeDiaSemana} ({formatarDataBR(dataAula)}).
+              <span className="block sm:inline sm:ml-1 text-slate-400">
                 {turmaSelecionada !== 'TODAS'
                   ? `A turma ${turmaSelecionada} não possui atividades agendadas neste dia da semana.`
                   : `Nenhuma turma do ${categories.find((c) => c.key === categoria)?.label} possui treinos agendados para ${nomeDiaSemana}.`}
               </span>
             </div>
           </div>
-          <Badge variant="neutral">Sem Treino Agendado</Badge>
         </div>
       ) : (
         <div
-          className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-medium transition-all shadow-2xs ${
+          className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm transition-all shadow-2xs ${
             statusChamada === 'SALVA'
-              ? 'bg-emerald-50/60 border-emerald-100 text-emerald-800'
-              : 'bg-amber-50/40 border-amber-200/50 text-slate-600'
+              ? 'bg-emerald-50/50 border-emerald-100/80 text-emerald-800'
+              : 'bg-amber-50/20 border-amber-100/60 text-slate-500 font-normal'
           }`}
         >
           <div className="flex items-center gap-3">
             {statusChamada === 'SALVA' ? (
-              <CheckCircle2 size={22} className="text-emerald-600 shrink-0" />
+              <CheckCircle2 size={20} className="text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle size={22} className="text-amber-500 shrink-0" />
+              <AlertCircle size={18} className="text-amber-400/80 shrink-0" />
             )}
             <div>
               {statusChamada === 'SALVA' ? (
                 <span>
-                  <strong>Frequência Registrada</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)})
+                  <strong className="font-semibold text-emerald-800">Frequência Registrada</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)})
                   {dataRegistroChamada && (
                     <span className="text-emerald-700/80 ml-1">
                       (última atualização às {formatarDataHoraBR(dataRegistroChamada)})
@@ -699,17 +698,18 @@ export const FrequenciaModule: React.FC = () => {
                 </span>
               ) : (
                 <span>
-                  <strong className="text-amber-700 font-semibold">Frequência Pendente</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)}). Marque as presenças da turma na lista abaixo.
+                  <span className="font-medium text-amber-700/75">Frequência Pendente</span>{' '}
+                  <span className="text-slate-400">para {nomeDiaSemana} ({formatarDataBR(dataAula)}). Marque as presenças da turma na lista abaixo.</span>
                 </span>
               )}
             </div>
           </div>
 
-          <div className="shrink-0 self-end sm:self-auto">
-            <Badge variant={statusChamada === 'SALVA' ? 'success' : 'warning'}>
-              {statusChamada === 'SALVA' ? 'Realizada' : 'Pendente'}
-            </Badge>
-          </div>
+          {statusChamada === 'SALVA' && (
+            <div className="shrink-0 self-end sm:self-auto">
+              <Badge variant="success">Realizada</Badge>
+            </div>
+          )}
         </div>
       )}
 
