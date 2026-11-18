@@ -582,39 +582,67 @@ export const FinanceiroModule: React.FC = () => {
         .reduce((acc, l) => acc + l.valor, 0);
 
       // Regra especial para SALARIOS:
-      // Se houver colaboradores ativos cadastrados no mês que ainda NÃO foram pagos,
+      // Se houver colaboradores ativos cadastrados que ainda NÃO foram pagos,
       // a folha prevista pendente conta automaticamente como COMPROMETIDO!
-      if (r.id === 'SALARIOS' && periodoMatriz === 'MENSAL') {
+      if (r.id === 'SALARIOS') {
         const colabsAtivos = colaboradores.filter((c) => c.status !== 'INATIVO');
-        let salariosPendentesMes = 0;
+        let salariosPendentes = 0;
 
-        colabsAtivos.forEach((c) => {
-          // Verifica se já tem folha desse mês
-          const folhaMes = folhas.find(
-            (f) => f.colaboradorId === c.id && f.mesReferencia === subPeriodoMes
-          );
-
-          const isPago = folhaMes?.status === 'PAGO' || lancsDaRubrica.some(
-            (l) => l.colaboradorId === c.id && l.status === 'PAGO'
-          );
-
-          if (!isPago) {
-            // Calcula o valor líquido previsto do colaborador
-            if (folhaMes && folhaMes.liquidoPagar > 0) {
-              salariosPendentesMes += folhaMes.liquidoPagar;
-            } else {
-              const isHorista = c.tipoContratacao === 'HORISTA';
-              const vHora = isHorista ? (c.valorHora || 50) : 0;
-              const hReg = isHorista ? 40 : 160;
-              const bruto = isHorista ? hReg * vHora : (c.salarioFixo || 0);
-              const ben = c.beneficios || 0;
-              salariosPendentesMes += (bruto + ben);
-            }
+        // Determina a lista de meses cobertos pelo filtro atual
+        const mesesDoPeriodo: string[] = [];
+        if (periodoMatriz === 'MENSAL') {
+          mesesDoPeriodo.push(subPeriodoMes);
+        } else if (periodoMatriz === 'SEMESTRAL') {
+          const anoBase = new Date().getFullYear();
+          const mesInicio = subPeriodoSemestre === 'JAN_JUN' ? 1 : 7;
+          for (let m = mesInicio; m < mesInicio + 6; m++) {
+            mesesDoPeriodo.push(toMesKey(anoBase, m));
           }
+        } else if (periodoMatriz === 'TRIMESTRAL') {
+          const anoBase = new Date().getFullYear();
+          const mapaT: Record<string, number> = { T1: 1, T2: 4, T3: 7, T4: 10 };
+          const mesInicio = mapaT[subPeriodoTrimestre] || 1;
+          for (let m = mesInicio; m < mesInicio + 3; m++) {
+            mesesDoPeriodo.push(toMesKey(anoBase, m));
+          }
+        } else {
+          // ANUAL: calcula para o mês atual de referência
+          mesesDoPeriodo.push(subPeriodoMes || getMesAtual());
+        }
+
+        mesesDoPeriodo.forEach((mRef) => {
+          colabsAtivos.forEach((c) => {
+            const folhaMes = folhas.find(
+              (f) => f.colaboradorId === c.id && f.mesReferencia === mRef
+            );
+
+            const isPago =
+              folhaMes?.status === 'PAGO' ||
+              lancamentos.some(
+                (l) =>
+                  l.tipo === 'SAIDA' &&
+                  l.categoria === 'SALARIOS' &&
+                  l.colaboradorId === c.id &&
+                  l.status === 'PAGO' &&
+                  (l.dataPagamento || l.dataVencimento || '').startsWith(mRef)
+              );
+
+            if (!isPago) {
+              if (folhaMes && folhaMes.liquidoPagar > 0) {
+                salariosPendentes += folhaMes.liquidoPagar;
+              } else {
+                const isHorista = c.tipoContratacao === 'HORISTA';
+                const vHora = isHorista ? (c.valorHora || 50) : 0;
+                const hReg = isHorista ? 40 : 160;
+                const bruto = isHorista ? hReg * vHora : (c.salarioFixo || 0);
+                const ben = c.beneficios || 0;
+                salariosPendentes += (bruto + ben);
+              }
+            }
+          });
         });
 
-        // Se o cálculo da folha pendente for maior que os lançamentos pendentes avulsos, usa a folha da equipe
-        comprometidoReal = Math.max(comprometidoReal, salariosPendentesMes);
+        comprometidoReal = Math.max(comprometidoReal, salariosPendentes);
       }
 
       const label =
@@ -634,7 +662,7 @@ export const FinanceiroModule: React.FC = () => {
         pctExecucao,
       };
     });
-  }, [rubricas, lancamentos, filtroRubrica, periodoMatriz, subPeriodoMes, subPeriodoSemestre, subPeriodoTrimestre, periodoSubtituloLinha]);
+  }, [rubricas, lancamentos, colaboradores, folhas, filtroRubrica, periodoMatriz, subPeriodoMes, subPeriodoSemestre, subPeriodoTrimestre, periodoSubtituloLinha]);
 
   const totaisMatriz = useMemo(() => {
     const previsto = rubricasCalculadas.reduce((acc, r) => acc + r.previsto, 0);
