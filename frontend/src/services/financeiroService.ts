@@ -9,7 +9,7 @@ export const financeiroService = {
         const response = await apiClient.get<LancamentoFinanceiro[]>('/financeiro', {
           params: { tipo, status, categoria: categoria === 'TODAS' ? undefined : categoria },
         });
-        if (Array.isArray(response.data) && response.data.length > 0) {
+        if (Array.isArray(response.data)) {
           return response.data;
         }
       } catch {
@@ -52,7 +52,7 @@ export const financeiroService = {
     if (isRemoteApiConfigured) {
       try {
         const response = await apiClient.get<OrcamentoMes[]>('/financeiro/orcamento');
-        if (Array.isArray(response.data) && response.data.length > 0) {
+        if (Array.isArray(response.data)) {
           return response.data;
         }
       } catch {

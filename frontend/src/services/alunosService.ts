@@ -9,7 +9,7 @@ export const alunosService = {
         const response = await apiClient.get<Aluno[]>('/alunos', {
           params: { categoria, busca },
         });
-        if (Array.isArray(response.data) && response.data.length > 0) {
+        if (Array.isArray(response.data)) {
           return response.data;
         }
       } catch {

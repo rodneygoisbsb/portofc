@@ -67,26 +67,7 @@ const DEFAULT_DIRECT_ACCOUNTS: DirectAccount[] = [
   },
 ];
 
-const INITIAL_SOLICITACOES: SolicitacaoCadastro[] = [
-  {
-    id: 1,
-    nome: 'Carlos Eduardo Santos',
-    email: 'carlos.santos@portofc.org',
-    cargo: 'Professor de Futebol',
-    dataSolicitacao: '2026-10-24 14:30',
-    status: 'APROVADO',
-    dataAprovacao: '2026-10-24 16:00',
-    aprovadoPor: 'Nayara (Gerente Geral)',
-  },
-  {
-    id: 2,
-    nome: 'Mariana Lima',
-    email: 'mariana.lima@portofc.org',
-    cargo: 'Assistente Administrativa',
-    dataSolicitacao: '2026-10-25 09:15',
-    status: 'PENDENTE',
-  },
-];
+const INITIAL_SOLICITACOES: SolicitacaoCadastro[] = [];
 
 export const authService = {
   getAccounts(): DirectAccount[] {

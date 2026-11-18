@@ -13,7 +13,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: isRemoteApiConfigured ? 2500 : 100,
+  timeout: isRemoteApiConfigured ? 15000 : 1000,
 });
 
 // Interceptor para adicionar token de autenticação se disponível

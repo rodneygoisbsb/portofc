@@ -64,6 +64,10 @@ export const PrestacaoContasModule: React.FC = () => {
 
   const totalUniformesEntregues = uniformes.reduce((acc, u) => acc + u.quantidadeEntregue, 0);
 
+  const assiduidadeMedia = alunos.length > 0
+    ? (alunos.reduce((acc, a) => acc + (a.taxaFrequencia ?? 90), 0) / alunos.length).toFixed(1)
+    : '0.0';
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Action Header (Hidden in Print) */}
@@ -115,7 +119,7 @@ export const PrestacaoContasModule: React.FC = () => {
             </div>
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
               <span className="text-xs text-slate-500">Frequência Escolar & Treinos</span>
-              <p className="text-xl font-black text-slate-900 mt-1">87.5% de assiduidade</p>
+              <p className="text-xl font-black text-slate-900 mt-1">{assiduidadeMedia}% de assiduidade</p>
               <p className="text-[11px] text-emerald-700 font-semibold mt-1">Acima do piso contratual (75%)</p>
             </div>
           </div>

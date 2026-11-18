@@ -7,7 +7,7 @@ export const materiaisService = {
     if (isRemoteApiConfigured) {
       try {
         const response = await apiClient.get<Material[]>('/materiais');
-        if (Array.isArray(response.data) && response.data.length > 0) {
+        if (Array.isArray(response.data)) {
           return response.data;
         }
       } catch {
@@ -40,7 +40,7 @@ export const materiaisService = {
     if (isRemoteApiConfigured) {
       try {
         const response = await apiClient.get<Uniforme[]>('/materiais/uniformes');
-        if (Array.isArray(response.data) && response.data.length > 0) {
+        if (Array.isArray(response.data)) {
           return response.data;
         }
       } catch {

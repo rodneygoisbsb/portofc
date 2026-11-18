@@ -177,25 +177,32 @@ export const DashboardModule: React.FC = () => {
           </div>
 
           <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.execucaoOrcamentaria} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="mesReferencia" stroke="#94a3b8" fontSize={12} tickLine={false} />
-                <YAxis
-                  stroke="#94a3b8"
-                  fontSize={12}
-                  tickLine={false}
-                  tickFormatter={(val) => `R$ ${val / 1000}k`}
-                />
-                <Tooltip
-                  formatter={(val: any) => [formatBRL(Number(val)), '']}
-                  contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-                />
-                <Legend iconType="circle" />
-                <Bar name="Previsto (Meta)" dataKey="previsto" fill="#93c5fd" radius={[6, 6, 0, 0]} />
-                <Bar name="Realizado (Gasto)" dataKey="realizado" fill="#1d4ed8" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {stats.execucaoOrcamentaria && stats.execucaoOrcamentaria.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.execucaoOrcamentaria} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="mesReferencia" stroke="#94a3b8" fontSize={12} tickLine={false} />
+                  <YAxis
+                    stroke="#94a3b8"
+                    fontSize={12}
+                    tickLine={false}
+                    tickFormatter={(val) => `R$ ${val / 1000}k`}
+                  />
+                  <Tooltip
+                    formatter={(val: any) => [formatBRL(Number(val)), '']}
+                    contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                  />
+                  <Legend iconType="circle" />
+                  <Bar name="Previsto (Meta)" dataKey="previsto" fill="#93c5fd" radius={[6, 6, 0, 0]} />
+                  <Bar name="Realizado (Gasto)" dataKey="realizado" fill="#1d4ed8" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs">
+                <TrendingUp size={28} className="text-slate-300 mb-2" />
+                <p>Nenhuma despesa ou meta registrada no período</p>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -211,30 +218,37 @@ export const DashboardModule: React.FC = () => {
             </div>
           </div>
 
-          <div className="h-72 w-full flex items-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={stats.despesasPorCategoria}
-                  dataKey="total"
-                  nameKey="categoria"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={95}
-                  paddingAngle={4}
-                >
-                  {stats.despesasPorCategoria.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(val: any) => [formatBRL(Number(val)), 'Total']}
-                  contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-                />
-                <Legend layout="vertical" align="right" verticalAlign="middle" iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="h-72 w-full flex items-center justify-center">
+            {stats.despesasPorCategoria && stats.despesasPorCategoria.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={stats.despesasPorCategoria}
+                    dataKey="total"
+                    nameKey="categoria"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={95}
+                    paddingAngle={4}
+                  >
+                    {stats.despesasPorCategoria.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(val: any) => [formatBRL(Number(val)), 'Total']}
+                    contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                  />
+                  <Legend layout="vertical" align="right" verticalAlign="middle" iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs">
+                <LucidePieChart size={28} className="text-slate-300 mb-2" />
+                <p>Nenhum lançamento de despesa liquidado ainda</p>
+              </div>
+            )}
           </div>
         </Card>
       </div>
