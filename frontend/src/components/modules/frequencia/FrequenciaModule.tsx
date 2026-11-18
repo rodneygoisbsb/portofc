@@ -658,12 +658,12 @@ export const FrequenciaModule: React.FC = () => {
 
       {/* Banner de Status Reativo da Chamada para a Data Selecionada */}
       {!turmaTemTreinoNaData || (alunosFiltrados.length === 0 && alunosCategoria.length > 0) ? (
-        <div className="p-4 rounded-2xl border bg-amber-50/20 border-amber-100/60 text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-normal transition-all shadow-2xs">
+        <div className="p-4 rounded-2xl border bg-amber-50/50 border-amber-200/50 text-amber-900/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm transition-all shadow-2xs">
           <div className="flex items-center gap-2.5">
-            <CalendarOff size={18} className="text-amber-400/80 shrink-0" />
+            <CalendarOff size={18} className="text-amber-500 shrink-0" />
             <div>
-              <span className="font-medium text-amber-700/75">Sem treino programado</span> para {nomeDiaSemana} ({formatarDataBR(dataAula)}).
-              <span className="block sm:inline sm:ml-1 text-slate-400">
+              <span className="font-semibold text-amber-800">Sem treino programado</span> para {nomeDiaSemana} ({formatarDataBR(dataAula)}).
+              <span className="block sm:inline sm:ml-1 text-slate-500">
                 {turmaSelecionada !== 'TODAS'
                   ? `A turma ${turmaSelecionada} não possui atividades agendadas neste dia da semana.`
                   : `Nenhuma turma do ${categories.find((c) => c.key === categoria)?.label} possui treinos agendados para ${nomeDiaSemana}.`}
@@ -676,14 +676,14 @@ export const FrequenciaModule: React.FC = () => {
           className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm transition-all shadow-2xs ${
             statusChamada === 'SALVA'
               ? 'bg-emerald-50/50 border-emerald-100/80 text-emerald-800'
-              : 'bg-amber-50/20 border-amber-100/60 text-slate-500 font-normal'
+              : 'bg-amber-50/50 border-amber-200/50 text-amber-900/70'
           }`}
         >
           <div className="flex items-center gap-3">
             {statusChamada === 'SALVA' ? (
               <CheckCircle2 size={20} className="text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle size={18} className="text-amber-400/80 shrink-0" />
+              <AlertCircle size={18} className="text-amber-500 shrink-0" />
             )}
             <div>
               {statusChamada === 'SALVA' ? (
@@ -698,8 +698,8 @@ export const FrequenciaModule: React.FC = () => {
                 </span>
               ) : (
                 <span>
-                  <span className="font-medium text-amber-700/75">Frequência Pendente</span>{' '}
-                  <span className="text-slate-400">para {nomeDiaSemana} ({formatarDataBR(dataAula)}). Marque as presenças da turma na lista abaixo.</span>
+                  <span className="font-semibold text-amber-800">Frequência Pendente</span>{' '}
+                  <span className="text-amber-900/70">para {nomeDiaSemana} ({formatarDataBR(dataAula)}). Marque as presenças da turma na lista abaixo.</span>
                 </span>
               )}
             </div>
