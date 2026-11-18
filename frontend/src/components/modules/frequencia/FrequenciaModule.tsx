@@ -471,6 +471,68 @@ export const FrequenciaModule: React.FC = () => {
         </button>
       </div>
 
+      {/* Sub-abas de Categorias (Turmas) com Linha Inferior Destacada e Seletor de Data Alinhado */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200">
+        <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-px">
+          {categories.map((c) => (
+            <button
+              key={c.key}
+              onClick={() => setCategoria(c.key)}
+              className={`pb-3 px-3 sm:px-4 text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-2 whitespace-nowrap ${
+                categoria === c.key
+                  ? 'border-blue-700 text-blue-700 font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Date Selector com Dia da Semana e Botão "Hoje" */}
+        <div className="pb-2.5 sm:pb-2 flex flex-wrap items-center gap-2 shrink-0 justify-start sm:justify-end">
+          {nomeDiaSemana && (
+            <span className="text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200/80 whitespace-nowrap">
+              {nomeDiaSemana}
+            </span>
+          )}
+          <div className="flex items-center gap-2 bg-white border border-slate-200/90 px-3 py-1.5 rounded-xl shadow-2xs">
+            <Calendar size={15} className="text-slate-400 shrink-0" />
+            <input
+              type="date"
+              value={dataAula}
+              onChange={(e) => {
+                setDataAula(e.target.value);
+                if (e.target.value) {
+                  const [ano, mes] = e.target.value.split('-');
+                  const correspondente = `${ano}-${mes}`;
+                  if (MESES_FREQ_OPCOES.some((m) => m.id === correspondente)) {
+                    setMesSelecionado(correspondente);
+                  }
+                }
+              }}
+              className="text-xs sm:text-sm font-medium text-slate-800 bg-transparent focus:outline-none cursor-pointer"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const hoje = getHojeStr();
+              setDataAula(hoje);
+              setMesSelecionado(hoje.slice(0, 7));
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              dataAula === getHojeStr()
+                ? 'bg-blue-700 text-white shadow-xs shadow-blue-700/20'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-700 shadow-2xs'
+            }`}
+            title="Selecionar a data de hoje"
+          >
+            Hoje
+          </button>
+        </div>
+      </div>
+
       {feedbackMsg && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center gap-2 text-sm font-medium animate-in fade-in">
           <CheckCircle size={18} className="text-emerald-600 shrink-0" />
@@ -538,73 +600,9 @@ export const FrequenciaModule: React.FC = () => {
         </Card>
       </div>
 
-      {/* Turma, Horário, Data com Botão Hoje e Filtro de Estatísticas */}
-      <Card className="space-y-4">
-        {/* Linha 1: Categoria e Data com Botão Hoje */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          {/* Category Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto">
-            {categories.map((c) => (
-              <button
-                key={c.key}
-                onClick={() => setCategoria(c.key)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                  categoria === c.key
-                    ? 'bg-blue-700 text-white shadow-sm shadow-blue-700/20'
-                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Date Selector com Dia da Semana e Botão "Hoje" */}
-          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
-            {nomeDiaSemana && (
-              <span className="text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200/80 whitespace-nowrap">
-                {nomeDiaSemana}
-              </span>
-            )}
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-xl">
-              <Calendar size={16} className="text-slate-400 shrink-0" />
-              <input
-                type="date"
-                value={dataAula}
-                onChange={(e) => {
-                  setDataAula(e.target.value);
-                  if (e.target.value) {
-                    const [ano, mes] = e.target.value.split('-');
-                    const correspondente = `${ano}-${mes}`;
-                    if (MESES_FREQ_OPCOES.some((m) => m.id === correspondente)) {
-                      setMesSelecionado(correspondente);
-                    }
-                  }
-                }}
-                className="text-sm text-slate-800 bg-transparent focus:outline-none cursor-pointer"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                const hoje = getHojeStr();
-                setDataAula(hoje);
-                setMesSelecionado(hoje.slice(0, 7));
-              }}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                dataAula === getHojeStr()
-                  ? 'bg-blue-700 text-white shadow-xs shadow-blue-700/20'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-700'
-              }`}
-              title="Selecionar a data de hoje"
-            >
-              Hoje
-            </button>
-          </div>
-        </div>
-
-        {/* Linha 2: Seletor de Turma e Horário de Treino + Botão Discreto de Filtrar Frequência */}
-        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 bg-slate-50/50 p-2.5 rounded-xl">
+      {/* Seletor de Turma e Horário de Treino + Ações da Chamada */}
+      <Card noPadding className="p-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
