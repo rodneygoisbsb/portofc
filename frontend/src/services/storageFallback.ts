@@ -794,9 +794,16 @@ export const fallbackStorage = {
   deleteColaborador(id: number): void {
     const list = this.getColaboradores().filter(c => c.id !== id);
     setStored('portofc_colaboradores', list);
+    // Remove também as folhas de pagamento vinculadas ao colaborador
+    const folhas = this.getFolhas().filter(f => f.colaboradorId !== id);
+    setStored('portofc_folhas', folhas);
   },
 
   // Folhas
+  deleteFolha(id: number): void {
+    const list = this.getFolhas().filter(f => f.id !== id);
+    setStored('portofc_folhas', list);
+  },
   getFolhas(): FolhaAula[] {
     return getStored('portofc_folhas', INITIAL_FOLHAS_DATA);
   },

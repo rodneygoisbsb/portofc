@@ -85,6 +85,14 @@ public class FolhaAulaService {
         return toResponseDTO(salva);
     }
 
+    @Transactional
+    public void deletar(Long id) {
+        if (!folhaAulaRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Folha não encontrada com o ID: " + id);
+        }
+        folhaAulaRepository.deleteById(id);
+    }
+
     public FolhaAulaResponseDTO toResponseDTO(FolhaAula f) {
         return FolhaAulaResponseDTO.builder()
                 .id(f.getId())

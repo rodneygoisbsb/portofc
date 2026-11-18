@@ -7,7 +7,7 @@ export const equipeService = {
     if (isRemoteApiConfigured) {
       try {
         const response = await apiClient.get<Colaborador[]>('/colaboradores', { params: { busca } });
-        if (Array.isArray(response.data) && response.data.length > 0) {
+        if (Array.isArray(response.data)) {
           return response.data;
         }
       } catch {
@@ -51,7 +51,7 @@ export const equipeService = {
     if (isRemoteApiConfigured) {
       try {
         const response = await apiClient.get<FolhaAula[]>('/folha-aulas', { params: { mesReferencia } });
-        if (Array.isArray(response.data) && response.data.length > 0) {
+        if (Array.isArray(response.data)) {
           return response.data;
         }
       } catch {
@@ -63,6 +63,15 @@ export const equipeService = {
       list = list.filter(f => f.mesReferencia === mesReferencia);
     }
     return list;
+  },
+
+  async deletarFolha(id: number): Promise<void> {
+    try {
+      await apiClient.delete(`/folha-aulas/${id}`);
+    } catch {
+      // Local fallback
+    }
+    fallbackStorage.deleteFolha(id);
   },
 
   async salvarFolha(data: Partial<FolhaAula>): Promise<FolhaAula> {

@@ -35,4 +35,10 @@ public class FolhaAulaController {
             @RequestParam StatusFolha status) {
         return ResponseEntity.ok(folhaAulaService.atualizarStatus(id, status));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        folhaAulaService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
 }

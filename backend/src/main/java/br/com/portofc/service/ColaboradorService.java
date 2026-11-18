@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class ColaboradorService {
 
     private final ColaboradorRepository colaboradorRepository;
+    private final br.com.portofc.repository.FolhaAulaRepository folhaAulaRepository;
 
     @Transactional(readOnly = true)
     public List<ColaboradorResponseDTO> listarTodos(String busca) {
@@ -93,6 +94,8 @@ public class ColaboradorService {
         if (!colaboradorRepository.existsById(id)) {
             throw new ResourceNotFoundException("Colaborador não encontrado com o ID: " + id);
         }
+        // Remove antes as folhas de pagamento vinculadas (FK colaborador_id)
+        folhaAulaRepository.deleteByColaboradorId(id);
         colaboradorRepository.deleteById(id);
     }
 

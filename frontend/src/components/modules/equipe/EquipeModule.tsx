@@ -292,7 +292,9 @@ export const EquipeModule: React.FC = () => {
 
   // Cálculos consolidados da Folha de Pagamento do Mês Selecionado
   const folhasExibicao = useMemo(() => {
-    return folhas.map((f) => {
+    // Ignora folhas cujo colaborador foi excluído do cadastro
+    const idsColaboradores = new Set(colaboradores.map((c) => c.id));
+    return folhas.filter((f) => idsColaboradores.has(f.colaboradorId)).map((f) => {
       // Localiza o colaborador cadastrado para garantir sincronia total de fotos, cargos e vínculo
       const colabCadastrado = colaboradores.find((c) => c.id === f.colaboradorId);
       const isHorista = (colabCadastrado?.tipoContratacao || f.tipoContratacao) === 'HORISTA';
@@ -624,6 +626,20 @@ export const EquipeModule: React.FC = () => {
       chavePix: colab.chavePix || '',
     });
     setIsColabModalOpen(true);
+  };
+
+  const handleDeleteFolha = async (folha: FolhaAula) => {
+    if (!confirm(`Deseja excluir a folha de pagamento de "${folha.colaboradorNome}" deste mês?`)) return;
+    try {
+      if (folha.status === 'PAGO' && folha.lancamentoFinanceiroId) {
+        await financeiroService.deletarLancamento(folha.lancamentoFinanceiroId);
+      }
+      await equipeService.deletarFolha(folha.id);
+      loadData();
+    } catch (err) {
+      console.error('Erro ao excluir folha', err);
+      alert('Não foi possível excluir a folha de pagamento.');
+    }
   };
 
   const handleDeleteColaborador = async (colab: Colaborador) => {
@@ -1197,6 +1213,14 @@ export const EquipeModule: React.FC = () => {
                             title="Editar dados da folha"
                           >
                             <Edit size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteFolha(item)}
+                            className="p-1.5 text-slate-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all cursor-pointer border border-slate-200/80"
+                            title="Excluir folha de pagamento"
+                          >
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>
