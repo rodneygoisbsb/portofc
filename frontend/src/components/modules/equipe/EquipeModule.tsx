@@ -35,6 +35,9 @@ import {
   ArrowUpRight,
   UserCheck,
   ShieldCheck,
+  Users,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Card } from '../../ui/Card';
 import { Badge } from '../../ui/Badge';
@@ -90,6 +93,24 @@ interface FolhaEditFormData {
   dataPagamento: string;
 }
 
+// Meses de referência
+const NOMES_MESES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
+
+const NOMES_MESES_CURTOS = [
+  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+];
+
+const toMesKey = (ano: number, mes: number) => `${ano}-${String(mes).padStart(2, '0')}`;
+
+const getMesAtualReferencia = (): string => {
+  const hoje = new Date();
+  return toMesKey(hoje.getFullYear(), hoje.getMonth() + 1);
+};
+
 export const EquipeModule: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'colaboradores' | 'folha' | 'solicitacoes'>('folha');
@@ -121,7 +142,12 @@ export const EquipeModule: React.FC = () => {
   };
 
   // Filtro de Mês de Referência da Folha (Único filtro em Equipe)
-  const [selectedMes, setSelectedMes] = useState('2026-10');
+  const [selectedMes, setSelectedMes] = useState(getMesAtualReferencia);
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const [pickerAno, setPickerAno] = useState<number>(() => {
+    const parts = (selectedMes || getMesAtualReferencia()).split('-');
+    return parseInt(parts[0], 10) || new Date().getFullYear();
+  });
 
   // Teto Orçamentário Mensal de Salários
   const [tetoConfig, setTetoConfig] = useState<TetoConfig>({
@@ -291,38 +317,48 @@ export const EquipeModule: React.FC = () => {
   }, [colaboradores, searchTerm, filterOnlyBirthdays]);
 
   // Cálculos consolidados da Folha de Pagamento do Mês Selecionado
+  // Lista automaticamente todos os colaboradores ATIVOS para o mês selecionado
   const folhasExibicao = useMemo(() => {
-    // Ignora folhas cujo colaborador foi excluído do cadastro
-    const idsColaboradores = new Set(colaboradores.map((c) => c.id));
-    return folhas.filter((f) => idsColaboradores.has(f.colaboradorId)).map((f) => {
-      // Localiza o colaborador cadastrado para garantir sincronia total de fotos, cargos e vínculo
-      const colabCadastrado = colaboradores.find((c) => c.id === f.colaboradorId);
-      const isHorista = (colabCadastrado?.tipoContratacao || f.tipoContratacao) === 'HORISTA';
+    // Apenas colaboradores com status ATIVO (ou sem status definido) participam da folha
+    const colabsAtivos = colaboradores.filter((c) => c.status !== 'INATIVO');
 
-      const valorHora = isHorista
-        ? (colabCadastrado?.valorHora || f.valorHora || 50.0)
-        : (f.valorHora || 25.0);
+    return colabsAtivos.map((colab) => {
+      // Verifica se já existe um lançamento/ajuste salvo de folha para este colaborador neste mês
+      const folhaExistente = folhas.find(
+        (f) => f.colaboradorId === colab.id && (!f.mesReferencia || f.mesReferencia === selectedMes)
+      );
 
-      const nome = colabCadastrado?.nome || f.colaboradorNome;
-      const funcao = colabCadastrado?.funcao || f.colaboradorFuncao;
-      const fotoUrl = colabCadastrado?.fotoUrl || f.colaboradorFotoUrl;
-      const tipoContratacao = colabCadastrado?.tipoContratacao || f.tipoContratacao || 'HORISTA';
+      const isHorista = colab.tipoContratacao === 'HORISTA';
+      const valorHora = isHorista ? (colab.valorHora || 50.0) : 0;
+      const horasRegistradas = folhaExistente?.horasRegistradas !== undefined ? folhaExistente.horasRegistradas : (isHorista ? 40 : 160);
 
-      const diasTransporte = f.diasTransporte !== undefined ? f.diasTransporte : (isHorista ? 16 : 20);
-      const valorDiarioTransporte = f.valorDiarioTransporte !== undefined ? f.valorDiarioTransporte : 11.0;
-      const passagemMes = f.passagem !== undefined ? f.passagem : diasTransporte * valorDiarioTransporte;
-      const outrosBeneficiosMes = f.outrosBeneficios !== undefined ? f.outrosBeneficios : Math.max(0, f.beneficios - passagemMes);
+      const totalBruto = folhaExistente?.totalBruto !== undefined
+        ? folhaExistente.totalBruto
+        : isHorista
+          ? horasRegistradas * valorHora
+          : (colab.salarioFixo || 0);
+
+      const diasTransporte = folhaExistente?.diasTransporte !== undefined ? folhaExistente.diasTransporte : (isHorista ? 16 : 20);
+      const valorDiarioTransporte = folhaExistente?.valorDiarioTransporte !== undefined ? folhaExistente.valorDiarioTransporte : 11.0;
+      const passagemMes = folhaExistente?.passagem !== undefined ? folhaExistente.passagem : diasTransporte * valorDiarioTransporte;
+      const outrosBeneficiosMes = folhaExistente?.outrosBeneficios !== undefined
+        ? folhaExistente.outrosBeneficios
+        : (colab.beneficios || 0);
       const beneficiosMes = passagemMes + outrosBeneficiosMes;
+      const descontos = folhaExistente?.descontos || 0;
+      const liquidoPagar = totalBruto + beneficiosMes - descontos;
 
-      const totalBruto = isHorista ? f.horasRegistradas * valorHora : f.totalBruto;
-      const liquidoPagar = totalBruto + beneficiosMes - f.descontos;
+      const folhaId = folhaExistente?.id || -colab.id; // ID virtual caso ainda não tenha sido persistido no mês
 
       return {
-        ...f,
-        colaboradorNome: nome,
-        colaboradorFuncao: funcao,
-        colaboradorFotoUrl: fotoUrl,
-        tipoContratacao,
+        id: folhaId,
+        colaboradorId: colab.id,
+        colaboradorNome: colab.nome,
+        colaboradorFuncao: colab.funcao,
+        colaboradorFotoUrl: colab.fotoUrl,
+        tipoContratacao: colab.tipoContratacao || 'HORISTA',
+        mesReferencia: selectedMes,
+        horasRegistradas,
         valorHora,
         totalBruto,
         diasTransporte,
@@ -330,10 +366,18 @@ export const EquipeModule: React.FC = () => {
         passagem: passagemMes,
         outrosBeneficios: outrosBeneficiosMes,
         beneficios: beneficiosMes,
+        descontos,
         liquidoPagar,
-      };
+        status: folhaExistente?.status || 'PENDENTE',
+        dataPagamento: folhaExistente?.dataPagamento,
+        formaPagamento: folhaExistente?.formaPagamento,
+        comprovanteUrl: folhaExistente?.comprovanteUrl,
+        comprovanteNome: folhaExistente?.comprovanteNome,
+        comprovanteTipo: folhaExistente?.comprovanteTipo,
+        lancamentoFinanceiroId: folhaExistente?.lancamentoFinanceiroId,
+      } as FolhaAula;
     });
-  }, [folhas, colaboradores]);
+  }, [folhas, colaboradores, selectedMes]);
 
   // Teto Orçamentário Mensal (referente ao mês selecionado)
   const tetoMensalAtivo = tetoConfig.mensal || 15000.0;
@@ -428,7 +472,28 @@ export const EquipeModule: React.FC = () => {
       const nomeColab = colab?.nome || payingFolha.colaboradorNome;
       const funcaoColab = colab?.funcao || payingFolha.colaboradorFuncao;
 
-      // 1. Lança automaticamente a saída no Financeiro com categoria SALARIOS
+      // 1. Se a folha ainda não tinha sido persistida no banco (id < 0), salva primeiro
+      let folhaSalvaId = payingFolha.id;
+      if (payingFolha.id < 0) {
+        const salva = await equipeService.salvarFolha({
+          colaboradorId: payingFolha.colaboradorId,
+          mesReferencia: payingFolha.mesReferencia || selectedMes,
+          horasRegistradas: payingFolha.horasRegistradas,
+          valorHora: payingFolha.valorHora,
+          totalBruto: payingFolha.totalBruto,
+          diasTransporte: payingFolha.diasTransporte,
+          valorDiarioTransporte: payingFolha.valorDiarioTransporte,
+          passagem: payingFolha.passagem,
+          outrosBeneficios: payingFolha.outrosBeneficios,
+          beneficios: payingFolha.beneficios,
+          descontos: payingFolha.descontos,
+          liquidoPagar: payingFolha.liquidoPagar,
+          status: 'PENDENTE',
+        });
+        folhaSalvaId = salva.id;
+      }
+
+      // 2. Lança automaticamente a saída no Financeiro com categoria SALARIOS
       const novoLancamento = await financeiroService.salvarLancamento({
         tipo: 'SAIDA',
         categoria: 'SALARIOS',
@@ -442,11 +507,11 @@ export const EquipeModule: React.FC = () => {
         comprovanteNome: paymentForm.comprovanteNome,
         comprovanteTipo: paymentForm.comprovanteTipo,
         colaboradorId: payingFolha.colaboradorId,
-        folhaId: payingFolha.id,
+        folhaId: folhaSalvaId,
       });
 
-      // 2. Atualiza a folha de pagamento para PAGO vinculando o lançamento financeiro
-      await equipeService.atualizarStatusFolha(payingFolha.id, 'PAGO', {
+      // 3. Atualiza a folha de pagamento para PAGO vinculando o lançamento financeiro
+      await equipeService.atualizarStatusFolha(folhaSalvaId, 'PAGO', {
         dataPagamento: paymentForm.dataPagamento,
         formaPagamento: paymentForm.formaPagamento,
         comprovanteUrl: paymentForm.comprovanteUrl,
@@ -559,7 +624,7 @@ export const EquipeModule: React.FC = () => {
     const liquidoCalculado = totalBrutoCalculado + totalBeneficios - descontosNum;
 
     await equipeService.salvarFolha({
-      id: editingFolha.id,
+      id: editingFolha.id > 0 ? editingFolha.id : undefined,
       colaboradorId: editingFolha.colaboradorId,
       mesReferencia: editingFolha.mesReferencia || selectedMes,
       horasRegistradas: horasNum,
@@ -875,26 +940,119 @@ export const EquipeModule: React.FC = () => {
 
       {activeTab === 'folha' ? (
         <div className="space-y-6">
-          {/* Barra de Filtro de Mês de Referência (Único filtro em Folha de Pagamento) */}
+          {/* Barra de Filtro de Mês de Referência (com Calendário Interativo) */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+            <div className="relative flex items-center gap-3">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                 <Calendar size={15} className="text-blue-600" /> Mês de Referência:
               </span>
-              <select
-                value={selectedMes}
-                onChange={(e) => {
-                  setSelectedMes(e.target.value);
-                  equipeService.listarFolhas(e.target.value).then(setFolhas);
+
+              {/* Botão que abre o seletor de calendário */}
+              <button
+                type="button"
+                onClick={() => {
+                  const parts = selectedMes.split('-');
+                  setPickerAno(parseInt(parts[0], 10) || new Date().getFullYear());
+                  setIsMonthPickerOpen((prev) => !prev);
                 }}
-                className="px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-600/30 cursor-pointer shadow-2xs hover:bg-slate-100 transition-colors"
+                className="inline-flex items-center gap-2.5 px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 hover:bg-slate-100 transition-colors shadow-2xs cursor-pointer focus:ring-2 focus:ring-blue-600/30"
               >
-                <option value="2026-10">Outubro / 2026</option>
-                <option value="2026-09">Setembro / 2026</option>
-                <option value="2026-08">Agosto / 2026</option>
-                <option value="2026-07">Julho / 2026</option>
-                <option value="2026-06">Junho / 2026</option>
-              </select>
+                <span>{formatMesNome(selectedMes)}</span>
+                <Calendar size={14} className="text-blue-600" />
+              </button>
+
+              {/* Popover / Dropdown Calendário de Mês e Ano */}
+              {isMonthPickerOpen && (
+                <>
+                  {/* Backdrop para fechar ao clicar fora */}
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setIsMonthPickerOpen(false)}
+                  />
+
+                  <div className="absolute top-full left-0 mt-2 z-40 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 w-72 animate-in fade-in zoom-in-95 duration-150">
+                    {/* Header com Navegação de Ano */}
+                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setPickerAno((a) => a - 1)}
+                        className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-lg transition-colors cursor-pointer"
+                        title="Ano anterior"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <span className="text-sm font-bold text-slate-800">{pickerAno}</span>
+                      <button
+                        type="button"
+                        onClick={() => setPickerAno((a) => a + 1)}
+                        className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-lg transition-colors cursor-pointer"
+                        title="Próximo ano"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+
+                    {/* Grid com os 12 Meses */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {NOMES_MESES_CURTOS.map((nomeCurto, idx) => {
+                        const mesNum = idx + 1;
+                        const mesKey = toMesKey(pickerAno, mesNum);
+                        const isSelected = selectedMes === mesKey;
+                        const hoje = new Date();
+                        const isAtual = hoje.getFullYear() === pickerAno && hoje.getMonth() + 1 === mesNum;
+
+                        return (
+                          <button
+                            key={mesKey}
+                            type="button"
+                            onClick={() => {
+                              setSelectedMes(mesKey);
+                              setIsMonthPickerOpen(false);
+                              equipeService.listarFolhas(mesKey).then(setFolhas);
+                            }}
+                            className={`py-2 px-2 text-xs font-semibold rounded-xl transition-all cursor-pointer relative ${
+                              isSelected
+                                ? 'bg-blue-600 text-white shadow-xs font-bold'
+                                : isAtual
+                                ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+                                : 'hover:bg-slate-100 text-slate-700'
+                            }`}
+                          >
+                            {nomeCurto}
+                            {isAtual && !isSelected && (
+                              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Botão de Atalho para Mês Atual */}
+                    <div className="mt-3 pt-2.5 border-t border-slate-100 flex justify-between items-center text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const atual = getMesAtualReferencia();
+                          setSelectedMes(atual);
+                          setPickerAno(new Date().getFullYear());
+                          setIsMonthPickerOpen(false);
+                          equipeService.listarFolhas(atual).then(setFolhas);
+                        }}
+                        className="text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
+                      >
+                        Mês Atual
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsMonthPickerOpen(false)}
+                        className="text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
+                      >
+                        Fechar
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="text-xs text-slate-500 font-medium">
@@ -1085,8 +1243,17 @@ export const EquipeModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {folhasExibicao.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                  {folhasExibicao.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-slate-400">
+                        <Users size={32} className="mx-auto text-slate-300 mb-2" />
+                        <p className="font-semibold text-slate-600">Nenhum colaborador ativo encontrado para este mês</p>
+                        <p className="text-xs text-slate-400 mt-1">Cadastre colaboradores na aba "Colaboradores" para gerar a folha automaticamente.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    folhasExibicao.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
                       {/* Coluna Nome / Profissional espaçosa */}
                       <td className="py-4 px-6 text-left border-b border-slate-100">
                         <div
@@ -1225,7 +1392,7 @@ export const EquipeModule: React.FC = () => {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )))}
                 </tbody>
               </table>
             </div>
