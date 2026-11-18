@@ -533,13 +533,6 @@ export const FrequenciaModule: React.FC = () => {
         </div>
       </div>
 
-      {feedbackMsg && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center gap-2 text-sm font-medium animate-in fade-in">
-          <CheckCircle size={18} className="text-emerald-600 shrink-0" />
-          <span>{feedbackMsg}</span>
-        </div>
-      )}
-
       {/* KPI Cards de Resumo da Frequência do Dia */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="flex items-center justify-between p-4">
@@ -665,12 +658,12 @@ export const FrequenciaModule: React.FC = () => {
 
       {/* Banner de Status Reativo da Chamada para a Data Selecionada */}
       {!turmaTemTreinoNaData || (alunosFiltrados.length === 0 && alunosCategoria.length > 0) ? (
-        <div className="p-4 rounded-2xl border bg-amber-50/90 border-amber-200 text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-medium transition-all shadow-xs">
+        <div className="p-4 rounded-2xl border bg-amber-50/40 border-amber-200/50 text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-medium transition-all shadow-2xs">
           <div className="flex items-center gap-2.5">
-            <CalendarOff size={20} className="text-amber-600 shrink-0" />
+            <CalendarOff size={20} className="text-amber-500 shrink-0" />
             <div>
-              <strong>Sem treino programado</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)}).
-              <span className="block sm:inline sm:ml-1 text-amber-800/80">
+              <strong className="text-amber-700 font-semibold">Sem treino programado</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)}).
+              <span className="block sm:inline sm:ml-1 text-slate-500">
                 {turmaSelecionada !== 'TODAS'
                   ? `A turma ${turmaSelecionada} não possui atividades agendadas neste dia da semana.`
                   : `Nenhuma turma do ${categories.find((c) => c.key === categoria)?.label} possui treinos agendados para ${nomeDiaSemana}.`}
@@ -681,17 +674,17 @@ export const FrequenciaModule: React.FC = () => {
         </div>
       ) : (
         <div
-          className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-medium transition-all shadow-xs ${
+          className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-medium transition-all shadow-2xs ${
             statusChamada === 'SALVA'
-              ? 'bg-emerald-50/80 border-emerald-200 text-emerald-800'
-              : 'bg-amber-50/80 border-amber-200 text-amber-900'
+              ? 'bg-emerald-50/60 border-emerald-100 text-emerald-800'
+              : 'bg-amber-50/40 border-amber-200/50 text-slate-600'
           }`}
         >
           <div className="flex items-center gap-3">
             {statusChamada === 'SALVA' ? (
               <CheckCircle2 size={22} className="text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle size={22} className="text-amber-600 shrink-0" />
+              <AlertCircle size={22} className="text-amber-500 shrink-0" />
             )}
             <div>
               {statusChamada === 'SALVA' ? (
@@ -706,7 +699,7 @@ export const FrequenciaModule: React.FC = () => {
                 </span>
               ) : (
                 <span>
-                  <strong>Frequência Pendente</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)}). Marque as presenças da turma na lista abaixo.
+                  <strong className="text-amber-700 font-semibold">Frequência Pendente</strong> para {nomeDiaSemana} ({formatarDataBR(dataAula)}). Marque as presenças da turma na lista abaixo.
                 </span>
               )}
             </div>
